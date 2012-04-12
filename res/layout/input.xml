@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="250dip"
+    android:layout_alignParentBottom="true"
+    android:background="@color/background"
+    android:orientation="horizontal" >
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <ToggleButton
+            android:id="@+id/altKey"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0"
+            android:layout_marginTop="5dip"
+            android:textOff="@string/altKey"
+            android:textOn="@string/altKey" />
+
+        <ToggleButton
+            android:id="@+id/shiftKey"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0"
+            android:layout_marginTop="5dip"
+            android:textOff="@string/shiftKey"
+            android:textOn="@string/shiftKey" />
+
+        <Button
+            android:id="@+id/typeSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0"
+            android:layout_marginTop="5dip"
+            android:text="@string/alphaOn" />
+
+    </LinearLayout>
+
+    <android.gesture.GestureOverlayView
+        android:id="@+id/gestures"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:gestureStrokeType="multiple"
+        android:gestureStrokeWidth="5.0"
+        android:eventsInterceptionEnabled="true">
+    </android.gesture.GestureOverlayView>
+
+</LinearLayout>

@@ -1,0 +1,6 @@
+
+    <resources>
+        <color name="background">#6D6D6D</color>
+        <color name="gesture">#FFFFFFFF</color>
+        <color name="red">#FF0000</color>
+    </resources>
