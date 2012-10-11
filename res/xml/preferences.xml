@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory
+		android:title="@string/recognition_cat_title"
+		android:key="recognition_category">
+			<ListPreference
+				android:key="gesture_interval"
+				android:title="@string/gest_interval_title"
+				android:summary="@string/gest_interval_desc"
+				android:defaultValue="300"
+				android:entries="@array/gestureInterval"
+				android:entryValues="@array/gestureIntervalValues"
+				/>
+			<PreferenceScreen
+                android:title="@string/train_gestures_title"
+                android:summary="@string/train_gestures_desc">
+            	<intent android:action="pl.scribedroid.settings.TrainGesturesActivity"/>
+			</PreferenceScreen>
+			<CheckBoxPreference
+	            android:key="vibrate_on"
+	            android:title="@string/vibrate_on_title"
+	            android:defaultValue="true"
+	        />
+			 
+	</PreferenceCategory>
+	<PreferenceCategory
+		android:title="@string/dictionary_cat_title"
+		android:key="dictionary_category">
+			<CheckBoxPreference
+	            android:key="use_dictionary"
+	            android:title="@string/use_dictionary_title"
+	            android:summary="@string/use_dictionary_desc"
+	            android:defaultValue="true"
+	        />
+			 
+	</PreferenceCategory>
+	<PreferenceCategory
+		android:title="@string/info_cat_title"
+		android:key="help_category">
+	</PreferenceCategory>
+</PreferenceScreen>

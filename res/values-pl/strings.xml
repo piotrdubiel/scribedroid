@@ -1,0 +1,20 @@
+
+    <resources>
+        <string name="recognition_cat_title">Paramtery rozpoznawania</string>
+        <string name="gest_interval_title">Czas między kreskami</string>
+        <string name="gest_interval_desc">Czas od zakończenia gestu, po którym rozpocznie się rozpoznawanie</string>
+        <string name="dictionary_cat_title">Słownik</string>
+        <string name="info_cat_title">Informacje</string>
+        <string name="dictionary_picker_title">Wybierz słowniki</string>
+        <string name="train_gestures_title">Edycja charakteru pisma</string>
+        <string name="train_gestures_desc">Napisz znaki swoim charakterem pisma, aby ulepszyć rozpoznawanie</string>
+        <string name="character_prompt">Wprowadź znak:</string>
+        <string name="next_button">Następny</string>
+        <string name="back_button">Poprzedni</string>
+        <string name="no_gesture_alert">Najpierw napisz znak!</string>
+        <string name="finish_button">Zakończ</string>
+        <string name="remove_word">Usuń całe słowo</string>
+        <string name="use_dictionary_desc">Włącza podpowiadanie słów na podstawie słownika</string>
+        <string name="use_dictionary_title">Używaj słownika</string>
+        <string name="vibrate_on_title">Wibracje po wpisaniu znaku</string>
+    </resources>
