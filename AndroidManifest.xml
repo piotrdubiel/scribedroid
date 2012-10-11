@@ -1,5 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" 
         package="pl.scribedroid">
+    <uses-sdk android:minSdkVersion="8"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.READ_USER_DICTIONARY" />
+    <uses-permission android:name="android.permission.WRITE_USER_DICTIONARY" />
     <application android:label="@string/ime_name">
         <service android:name=".input.ScribeDroid"
                 android:permission="android.permission.BIND_INPUT_METHOD">
@@ -10,13 +15,15 @@
         </service>
         <activity 
             android:name=".settings.SettingsActivity"
-			android:label="@string/app_name"
-			android:configChanges="keyboard|keyboardHidden|orientation">            
+			android:label="@string/app_name">            
         </activity>
         <activity 
-            android:name=".settings.CreateGestureActivity"
-			android:label="@string/app_name"
-			android:configChanges="keyboard|keyboardHidden|orientation">            
+            android:name=".settings.TrainGesturesActivity"
+			android:label="@string/app_name">     
+			<intent-filter>
+               <action android:name="pl.scribedroid.settings.TrainGesturesActivity"/>
+               <category android:name="android.intent.category.DEFAULT" />
+			</intent-filter>
         </activity>
-    </application>
+ 	</application>
 </manifest>

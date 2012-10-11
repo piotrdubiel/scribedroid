@@ -1,6 +1,10 @@
-
-    <resources>
-        <color name="background">#6D6D6D</color>
-        <color name="gesture">#FFFFFFFF</color>
-        <color name="red">#FF0000</color>
-    </resources>
+<resources>
+    <color name="background">#000000</color>
+    <color name="red">#FF0000</color>
+    <color name="gesture">#FFFFFF</color>
+    
+    <color name="candidate_normal">#FF000000</color>
+    <color name="candidate_recommended">#FFFF0000</color>
+    <color name="candidate_other">#ff808080</color>
+    <color name="candidate_background">#BBFFFFFF</color>
+</resources>
