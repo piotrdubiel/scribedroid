@@ -3,8 +3,6 @@ package pl.scribedroid.input.dictionary;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import pl.scribedroid.R;
 import android.content.Context;
 import android.util.Log;
 

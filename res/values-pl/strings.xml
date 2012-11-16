@@ -17,4 +17,7 @@
         <string name="use_dictionary_desc">Włącza podpowiadanie słów na podstawie słownika</string>
         <string name="use_dictionary_title">Używaj słownika</string>
         <string name="vibrate_on_title">Wibracje po wpisaniu znaku</string>
+        <string name="label_go_key">Idź</string>
+    	<string name="label_next_key">Dalej</string>
+    	<string name="label_send_key">Wyślij</string>
     </resources>
