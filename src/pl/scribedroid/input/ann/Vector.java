@@ -85,6 +85,46 @@ public class Vector {
 		return result;
 	}
 	
+	public float max() {
+		float m = Float.MIN_VALUE;
+		for (int i=0;i<size();++i) {
+			if (values[i] > m) m = values[i];
+		}
+		return m;
+	}
+	
+	public float maxIndex() {
+		float m = Float.MIN_VALUE;
+		int index = 0;
+		for (int i=0;i<size();++i) {
+			if (values[i] > m) {
+				m = values[i];
+				index = i;
+			}
+		}
+		return index;
+	}
+	
+	public float min() {
+		float m = Float.MIN_VALUE;
+		for (int i=0;i<size();++i) {
+			if (values[i] > m) m = values[i];
+		}
+		return m;
+	}
+	
+	public float minIndex() {
+		float m = Float.MIN_VALUE;
+		int index = 0;
+		for (int i=0;i<size();++i) {
+			if (values[i] > m) {
+				m = values[i];
+				index = i;
+			}
+		}
+		return index;
+	}
+	
 	public boolean equals(Vector b) {
 		//Log.d("VECTOR", "START");
 		if (size()!=b.size()) return false;

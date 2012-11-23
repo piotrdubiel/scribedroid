@@ -1,6 +1,7 @@
 package pl.scribedroid.input;
 
 import pl.scribedroid.R;
+import pl.scribedroid.input.classificator.Classificator;
 import pl.scribedroid.settings.SettingsActivity;
 import roboguice.inject.InjectResource;
 import android.content.Intent;
@@ -24,6 +25,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.google.inject.Inject;
+
 public class GestureInputMethod extends InputMethodController implements OnClickListener, OnLongClickListener {
 	private static final String TAG = "GestureInput";
 	/*@InjectView(R.id.altKey)*/ ToggleButton altKey;
@@ -39,7 +42,7 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 
 	@InjectResource(R.string.word_separators) String wordSeparators;
 	
-	private Classificator classHandler;
+	@Inject Classificator classHandler;
 	
 	int gestureInterval;
     int currentType;    
@@ -47,8 +50,6 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 
 	public GestureInputMethod(ScribeDroid s) {
 		super(s, R.layout.gesture_input_view);
-		
-		initClassificator();
 		
 		altKey = (ToggleButton) inputView.findViewById(R.id.altKey);
 		shiftKey = (ToggleButton) inputView.findViewById(R.id.shiftKey);
@@ -129,6 +130,11 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 				typeSwitch.setText(R.string.numOn);
 				Log.v(TAG, "Type - num");
 			}
+			else if(currentType == Classificator.NUMBER) {
+				currentType=Classificator.ALPHA_AND_NUMBER;
+				typeSwitch.setText(R.string.autoOn);
+				Log.v(TAG, "Type - auto");
+			}
 			else {
 				currentType=Classificator.ALPHA;
 				typeSwitch.setText(R.string.alphaOn);
@@ -199,30 +205,6 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 		}
 		service.getCurrentInputConnection().sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ALT_LEFT));
 		altKey.setChecked(false);
-	}
-	
-	
-	private void initClassificator() {
-		new AsyncTask<Void,Void,Void>() {
-			@Override
-			protected Void doInBackground(Void... params) {
-        		classHandler = new Classificator(service);
-        		return null;
-			}
-
-			@Override
-			protected void onPreExecute() {
-				super.onPreExecute();
-				//inputView.setEnabled(false);
-			}
-
-			@Override
-			protected void onPostExecute(Void result) {
-				Log.i(TAG,"Classificator loaded");
-				super.onPostExecute(result);
-				//inputView.setEnabled(true);
-			}
-        }.execute();
 	}
 	
 	private void showSymbols(boolean visible) {

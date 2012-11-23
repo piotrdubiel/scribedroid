@@ -1,16 +1,11 @@
 package pl.scribedroid.input;
 
-import java.security.KeyStore.LoadStoreParameter;
 import java.util.List;
-import java.util.Map;
-
-import com.google.inject.Key;
 
 import pl.scribedroid.R;
 import pl.scribedroid.input.dictionary.SuggestionManager;
 import roboguice.RoboGuice;
 import roboguice.inject.InjectResource;
-import roboguice.util.RoboContext;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.inputmethodservice.InputMethodService;
@@ -161,17 +156,10 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 		setCandidatesViewShown(false);
 	}
 	
-//	private void showKeyboard(boolean visible) {
-//		Log.d(TAG, "Show keyboard");
-//		if (visible) {
-//			currentInputView = standardKeyboardView;
-//		}
-//		else {
-//			currentInputView = gestureInputView;
-//		}
-//		 
-//        setInputView(currentInputView);
-//	}
+	private void switchInputMethod() {
+		if (currentInputMethod == gestureInputMethod) currentInputMethod = keyboardInputMethod;
+		else if (currentInputMethod == keyboardInputMethod) currentInputMethod = gestureInputMethod;
+	}
 	
 	private void loadPreferences() {
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -205,3 +193,4 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 		loadPreferences();
 	}
 }
+

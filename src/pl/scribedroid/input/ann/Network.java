@@ -5,12 +5,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import pl.scribedroid.input.classificator.ClassificationResult;
 import android.content.Context;
 
 public class Network {
 	private ArrayList<Layer> layers;
 	
-	private Network() {}
+	protected Network() {}
 	
 	public Network(int[] arch) {
 		layers=new ArrayList<Layer>();
@@ -19,7 +21,7 @@ public class Network {
 		}
 	}
 	
-	public float[] classify(float[] in) {
+	public float[] answer(float[] in) {
 		float[] result=in;
 	    for (Layer l : layers) {
 	    	result=l.answer(result);

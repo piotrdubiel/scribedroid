@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import pl.scribedroid.input.classificator.Classificator;
+
 import android.gesture.Gesture;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -127,6 +129,55 @@ public class Utils {
 				case 7: return "7";
 				case 8: return "8";
 				case 9: return "9";
+			}
+		}
+		else if (type==Classificator.ALPHA_AND_NUMBER) {
+			switch (i) {
+				case 0: return "0";
+				case 1: return "1";
+				case 2: return "2";
+				case 3: return "3";
+				case 4: return "4";
+				case 5: return "5";
+				case 6: return "6";
+				case 7: return "7";
+				case 8: return "8";
+				case 9: return "9";
+				case 10: return "a";
+				case 11: return "ą";
+				case 12: return "b";
+				case 13: return "c";
+				case 14: return "ć";
+				case 15: return "d";
+				case 16: return "e";
+				case 17: return "ę";
+				case 18: return "f";
+				case 19: return "g";
+				case 20: return "h";
+				case 21: return "i";
+				case 22: return "j";
+				case 23: return "k";
+				case 24: return "l";
+				case 25: return "ł";
+				case 26: return "m";
+				case 27: return "n";
+				case 28: return "ń";
+				case 29: return "o";
+				case 30: return "ó";
+				case 31: return "p";
+				case 32: return "q";
+				case 33: return "r";
+				case 34: return "s";
+				case 35: return "ś";
+				case 36: return "t";
+				case 37: return "u";
+				case 38: return "v";
+				case 39: return "w";
+				case 40: return "x";
+				case 41: return "y";
+				case 42: return "z";
+				case 43: return "ź";
+				case 44: return "ż";
 			}
 		}
 		return "";

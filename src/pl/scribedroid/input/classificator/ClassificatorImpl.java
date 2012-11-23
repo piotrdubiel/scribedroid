@@ -1,11 +1,14 @@
-package pl.scribedroid.input;
+package pl.scribedroid.input.classificator;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
 import pl.scribedroid.R;
+import pl.scribedroid.input.Utils;
 import pl.scribedroid.input.ann.Network;
 import android.content.Context;
 import android.gesture.Gesture;
@@ -13,13 +16,13 @@ import android.gesture.GestureLibraries;
 import android.gesture.GestureLibrary;
 import android.gesture.Prediction;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.util.Pair;
 
-public class Classificator {
-	public static final int ALPHA	= 0;
-	public static final int NUMBER	= 1;
-	
+import com.google.inject.Inject;
+
+public class ClassificatorImpl implements Classificator {
 	private static final boolean DEBUG = true;
 	
 	private Network alphaNet;
@@ -33,23 +36,40 @@ public class Classificator {
 	private Context context;
 	
 	private static final String TAG = "Classificator";
-	
-	public Classificator(Context context) {
-		this.context=context;
-		alphaNet=Network.createFromRawResource(context, R.raw.alphanet);		
-		numberNet=Network.createFromRawResource(context, R.raw.numnet);
+
+	@Inject
+	public ClassificatorImpl(Context c) {
+		
+		context = c;
+		new AsyncTask<Void,Void,Void>() {
+			@Override
+			protected Void doInBackground(Void... params) {
+
+				alphaNet=Network.createFromRawResource(context, R.raw.alphanet);		
+				numberNet=Network.createFromRawResource(context, R.raw.numnet);
+						
+				loadLibrary();
 				
-		loadLibrary();
-		
-		if (DEBUG) {
-			Log.d(TAG,String.valueOf(alphaLibrary.getGestureEntries().size())+" gestures in alpha library");
-			Log.d(TAG,String.valueOf(numberLibrary.getGestureEntries().size())+" gestures in number library");
-		}
-		
-		loadPCA();
+				if (DEBUG) {
+					Log.d(TAG,String.valueOf(alphaLibrary.getGestureEntries().size())+" gestures in alpha library");
+					Log.d(TAG,String.valueOf(numberLibrary.getGestureEntries().size())+" gestures in number library");
+				}
+				
+				loadPCA();
+        		return null;
+			}
+
+			@Override
+			protected void onPostExecute(Void result) {
+				Log.i(TAG,"Classificator loaded");
+				super.onPostExecute(result);
+				//inputView.setEnabled(true);
+			}
+        }.execute();
 	}
 	
-	public Character classify(Gesture gesture,int type) {
+	@Override
+	public Character classify(Gesture gesture,int type) {		
 		if (DEBUG) {
 			Log.d(TAG,"Classification start - type "+String.valueOf(type));
 		}
@@ -59,18 +79,9 @@ public class Classificator {
 		Network currentNet=null;
 		GestureLibrary currentLibrary=null;
 		
-		switch (type) {
-			case ALPHA: currentNet=alphaNet; currentLibrary=alphaLibrary; break;
-			case NUMBER: currentNet=numberNet; currentLibrary=numberLibrary; break;
-			default: currentNet=alphaNet; currentLibrary=alphaLibrary;
-		}
+		Network ln = Network.createFromRawResource(context, R.raw.l_plus_n_net);
+		Network lon = Network.createFromRawResource(context, R.raw.l_or_n_net);
 		
-	    ArrayList<Prediction> libraryAnswer=currentLibrary.recognize(gesture);
-
-	    if (DEBUG) {
-	    	Log.d(TAG,String.valueOf(libraryAnswer.size())+" predictions");
-	    }
-	    
 		Bitmap in=Utils.getBitmapFromGesture(gesture);
 		
 		if (in==null) return null;
@@ -95,9 +106,40 @@ public class Classificator {
 		//PCA        
         sample=Utils.applyPCA(sample,mu,trmx);
         
-        float[] netAnswer=currentNet.classify(sample);
 
+        float[] lonY = lon.answer(sample);
+        
+        if (type == Classificator.ALPHA_AND_NUMBER) {
+	        if (lonY[0] > lonY[1]) type = Classificator.ALPHA;
+	        else type = Classificator.NUMBER;
+        }
+        
+        switch (type) {
+        	case ALPHA: currentNet=alphaNet; currentLibrary=alphaLibrary; break;
+        	case NUMBER: currentNet=numberNet; currentLibrary=numberLibrary; break;
+        	default: currentNet=alphaNet; currentLibrary=alphaLibrary;
+        }
+
+
+	    ArrayList<Prediction> libraryAnswer=currentLibrary.recognize(gesture);
+	    
+	    if (DEBUG) {
+	    	Log.d(TAG,String.valueOf(libraryAnswer.size())+" predictions");
+	    }
+        
+        float[] netAnswer=currentNet.answer(sample);
+        
+        float[] lnY = ln.answer(sample);
+        
+        List<Pair<Float,String>> lnStr = Utils.getBest(lnY,Utils.RESULT_COUNT,Classificator.ALPHA_AND_NUMBER);
+        
+        Log.v(TAG,"LN: "+lnStr.get(0).second+" "+lnStr.get(1).second+" "+lnStr.get(2).second+" "+lnStr.get(3).second);
+        Log.v(TAG,"LON: "+Arrays.toString(lonY));
+
+        
+        
         Character character=metaVote(netAnswer,libraryAnswer,type);
+
         
         Log.v(TAG, "Classification time: "+String.valueOf((System.currentTimeMillis()-startTime)/1000.0)+"s");
         
@@ -105,7 +147,6 @@ public class Classificator {
 	}
 	
 	private Character metaVote(float[] netResult,ArrayList<Prediction> libraryResult,int type) {
-		//TODO
 		List<Pair<Float,String>> netStrings=Utils.getBest(netResult,Utils.RESULT_COUNT,type);		
 
 		boolean libraryValid=libraryResult!=null && !libraryResult.isEmpty() && libraryResult.get(0).score>2.0;
@@ -140,7 +181,6 @@ public class Classificator {
 				return getCharacter(netStrings.get(0).second);
 			}
 			else {
-				//TODO Waga par
 				List<Pair<Integer,String>> pairs=new ArrayList<Pair<Integer,String>>();
 				for (int i=0;i<Math.min(netStrings.size(),libraryResult.size());++i) {
 					for (int j=0;j<Math.min(netStrings.size(),libraryResult.size());++j) {
