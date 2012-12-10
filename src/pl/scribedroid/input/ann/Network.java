@@ -30,6 +30,10 @@ public class Network {
 	    return result;
 	}
 	
+	public Vector answer(Vector in) {
+		return new Vector(answer(in.toArray()));
+	}
+	
 	public List<List<Vector>> train(float[] in,int label) {
 		List<Vector> y=new ArrayList<Vector>();
 		List<Vector> dy=new ArrayList<Vector>();

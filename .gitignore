@@ -1,2 +1,8 @@
 /bin
 /obj
+/.settings
+/doc
+/.cproject
+/local.properties
+/proguard.cfg
+/gen

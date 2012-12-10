@@ -1,5 +1,7 @@
 package pl.scribedroid.input;
 
+import java.util.List;
+
 import pl.scribedroid.R;
 import pl.scribedroid.input.classificator.Classificator;
 import pl.scribedroid.settings.SettingsActivity;
@@ -257,15 +259,15 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 			}
 		}
 		
-		private class ClassificationTask extends AsyncTask<Gesture, Void, Character> {
+		private class ClassificationTask extends AsyncTask<Gesture, Void, List<Character>> {
 			@Override
-			protected Character doInBackground(Gesture... gestures) {
+			protected List<Character> doInBackground(Gesture... gestures) {
 				return classHandler.classify(gestures[0], currentType);
 			}
 
 			@Override
-			protected void onPostExecute(Character result) {
-				enterCharacter(result);
+			protected void onPostExecute(List<Character>  result) {
+				if (result != null && !result.isEmpty()) enterCharacter(result.get(0));
 				
 				altKey.setEnabled(true);
 				shiftKey.setEnabled(true);

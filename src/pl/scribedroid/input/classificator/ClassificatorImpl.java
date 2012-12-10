@@ -1,6 +1,7 @@
 package pl.scribedroid.input.classificator;
 
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ public class ClassificatorImpl implements Classificator {
 	}
 	
 	@Override
-	public Character classify(Gesture gesture,int type) {		
+	public List<Character> classify(Gesture gesture,int type) {		
 		if (DEBUG) {
 			Log.d(TAG,"Classification start - type "+String.valueOf(type));
 		}
@@ -81,14 +82,13 @@ public class ClassificatorImpl implements Classificator {
 		
 		Network ln = Network.createFromRawResource(context, R.raw.l_plus_n_net);
 		Network lon = Network.createFromRawResource(context, R.raw.l_or_n_net);
+		Network big = Network.createFromRawResource(context, R.raw.big_net);
+		Network small = Network.createFromRawResource(context, R.raw.small_net);
 		
 		Bitmap in=Utils.getBitmapFromGesture(gesture);
 		
 		if (in==null) return null;
 
-		if (DEBUG) {
-			Utils.saveBitmap(in,"input.png");
-		}
 		
         if (in.getWidth()>in.getHeight()) {
         	in=Bitmap.createScaledBitmap(in, 20, Math.max(20*in.getHeight()/in.getWidth(),1) , true);
@@ -98,10 +98,7 @@ public class ClassificatorImpl implements Classificator {
         }
 		
         float[] sample=Utils.getVectorFromBitmap(in);
-        
-        if (DEBUG) {
-        	Utils.saveVector(sample,"output.png");
-        }
+        float[] log = sample.clone();      
         
 		//PCA        
         sample=Utils.applyPCA(sample,mu,trmx);
@@ -128,26 +125,52 @@ public class ClassificatorImpl implements Classificator {
 	    }
         
         float[] netAnswer=currentNet.answer(sample);
-        
         float[] lnY = ln.answer(sample);
+        float[] bigY = big.answer(sample);
+        float[] smallY = small.answer(sample);
         
-        List<Pair<Float,String>> lnStr = Utils.getBest(lnY,Utils.RESULT_COUNT,Classificator.ALPHA_AND_NUMBER);
+        List<Pair<Character,Float>> lnStr = Utils.getBest(lnY,Utils.RESULT_COUNT,Classificator.ALPHA_AND_NUMBER);
         
         Log.v(TAG,"LN: "+lnStr.get(0).second+" "+lnStr.get(1).second+" "+lnStr.get(2).second+" "+lnStr.get(3).second);
         Log.v(TAG,"LON: "+Arrays.toString(lonY));
 
+        String bigStr = "Capital: [";
+        for (float f : bigY) {
+        	bigStr += f + " ";
+        }
+        bigStr += "]";
         
+        Log.d(TAG, "Small: "+smallY.length+" Big: "+bigY.length);
+        List<Pair<Character,Float>> smallList = Utils.getBest(smallY, 10, Classificator.ALPHA_PL);
+        String smallStr = "Small: [";
+        for (Pair<Character,Float> f : smallList) {
+        	smallStr += f.first + " ";
+        }
+        smallStr += "]";
         
-        Character character=metaVote(netAnswer,libraryAnswer,type);
+        Log.v(TAG, bigStr);
+        Log.v(TAG, smallStr);
+        
+        List<Character> characters=metaVote(netAnswer,libraryAnswer,type);
 
         
         Log.v(TAG, "Classification time: "+String.valueOf((System.currentTimeMillis()-startTime)/1000.0)+"s");
         
-		return character;
+        
+        if (DEBUG && characters != null && !characters.isEmpty()) {
+	        try {
+	        	Utils.saveVector(log,characters.get(0).toString()+System.currentTimeMillis()+".png");
+	        }
+	        catch (Exception e) {
+	        	Log.e(TAG, "ERROR "+e.getMessage());
+	        }
+        }
+        
+		return characters;
 	}
 	
-	private Character metaVote(float[] netResult,ArrayList<Prediction> libraryResult,int type) {
-		List<Pair<Float,String>> netStrings=Utils.getBest(netResult,Utils.RESULT_COUNT,type);		
+	private List<Character> metaVote(float[] netResult,ArrayList<Prediction> libraryResult,int type) {
+		List<Pair<Character,Float>> netStrings = Utils.getBest(netResult,Utils.RESULT_COUNT,type);		
 
 		boolean libraryValid=libraryResult!=null && !libraryResult.isEmpty() && libraryResult.get(0).score>2.0;
 		boolean netValid=netStrings!=null && !netStrings.isEmpty() && netStrings.get(0).first>0.1;
@@ -161,31 +184,33 @@ public class ClassificatorImpl implements Classificator {
 		
 			Log.v(TAG, "NET Valid "+String.valueOf(netValid));
 			if (netValid)
-			for (Pair<Float,String> n :netStrings) {
+			for (Pair<Character,Float> n :netStrings) {
 				Log.v(TAG,n.second+" "+String.valueOf(n.first));
 			}
 		}
 		
-		List<String> netPriorities=new ArrayList<String>();
+		List<Character> netPriorities=new ArrayList<Character>();
 		
-		List<String> libraryPriorities=new ArrayList<String>();	
+		List<Character> libraryPriorities=new ArrayList<Character>();	
 		
+		List<Character> result = null;
 		
 		if (libraryValid && netValid) {
+			result = new ArrayList<Character>();
 			if (libraryPriorities.contains(libraryResult.get(0).name)) {
 				if (DEBUG) Log.v(TAG, "Library priority");
-				return getCharacter(libraryResult.get(0).name);
+				result.add(getCharacter(libraryResult.get(0).name));
 			}
 			else if (netPriorities.contains(netStrings.get(0).second)) {
 				if (DEBUG) Log.v(TAG, "Net priority");
-				return getCharacter(netStrings.get(0).second);
+				result.add(netStrings.get(0).first);
 			}
 			else {
 				List<Pair<Integer,String>> pairs=new ArrayList<Pair<Integer,String>>();
 				for (int i=0;i<Math.min(netStrings.size(),libraryResult.size());++i) {
 					for (int j=0;j<Math.min(netStrings.size(),libraryResult.size());++j) {
-						if (netStrings.get(i).second.equals(libraryResult.get(j).name) &&
-								netStrings.get(i).first>0.2 && libraryResult.get(j).score>2.0) {
+						if (netStrings.get(i).first == libraryResult.get(j).name.charAt(0) &&
+								netStrings.get(i).second > 0.2 && libraryResult.get(j).score > 2.0) {
 							if (DEBUG) Log.v(TAG, "AGREED");
 							pairs.add(new Pair<Integer,String>(i+j,libraryResult.get(j).name));
 						}
@@ -202,28 +227,34 @@ public class ClassificatorImpl implements Classificator {
 						}
 					}
 					if (DEBUG) Log.v(TAG, "Pair - "+bestMatch);
-					return getCharacter(bestMatch);
+					result.add(getCharacter(bestMatch));
 				}
 			}
-			if (netStrings.get(0).first<0.75) {
+			if (netStrings.get(0).second < 0.75) {
 				if (DEBUG) Log.v(TAG,"Library's better");
-				return getCharacter(libraryResult.get(0).name);
+				result.add(getCharacter(libraryResult.get(0).name));
 			}
 			else {
 				if (DEBUG) Log.v(TAG,"Net's better");
-				return getCharacter(netStrings.get(0).second);
+				result.add(netStrings.get(0).first);
 			}
 		}
 		else if (libraryValid) {
+			result = new ArrayList<Character>();
 			if (DEBUG) Log.v(TAG, "Only library valid");
-			//return getCharacter(libraryResult.get(0).name);
-			return null;
+			result.add(getCharacter(libraryResult.get(0).name));
+
 		}
 		else if (netValid) {
+			result = new ArrayList<Character>();
 			if (DEBUG) Log.v(TAG, "Only net valid");
-			return getCharacter(netStrings.get(0).second);
+			result.add(netStrings.get(0).first);
 		}
-		else return null;
+		
+		for (Character a : result) {
+			Log.v("RESULT", a.toString());
+		}
+		return result;
 	}
 		
 	private void loadPCA() {
@@ -303,6 +334,18 @@ public class ClassificatorImpl implements Classificator {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public ClassificationResult classifiy(Gesture gesture, int type) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ClassificationResult classifiy(List<ClassificationResult> inputs) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
 

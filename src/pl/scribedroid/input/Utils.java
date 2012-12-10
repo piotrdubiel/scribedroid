@@ -14,6 +14,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Environment;
+import android.util.Log;
 import android.util.Pair;
 import android.view.KeyEvent;
 
@@ -86,101 +87,140 @@ public class Utils {
 		return color;
 	}
 	
-	public static String decode(int i,int type) {
+	public static Character decode(int i,int type) {
 		if (type==Classificator.ALPHA) {
 			switch (i) {
-				case 0: return "a";
-				case 1: return "b";
-				case 2: return "c";
-				case 3: return "d";
-				case 4: return "e";
-				case 5: return "f";
-				case 6: return "g";
-				case 7: return "h";
-				case 8: return "i";
-				case 9: return "j";
-				case 10: return "k";
-				case 11: return "l";
-				case 12: return "m";
-				case 13: return "n";
-				case 14: return "o";
-				case 15: return "p";
-				case 16: return "q";
-				case 17: return "r";
-				case 18: return "s";
-				case 19: return "t";
-				case 20: return "u";
-				case 21: return "v";
-				case 22: return "w";
-				case 23: return "x";
-				case 24: return "y";
-				case 25: return "z";
+				case 0: return 'a';
+				case 1: return 'b';
+				case 2: return 'c';
+				case 3: return 'd';
+				case 4: return 'e';
+				case 5: return 'f';
+				case 6: return 'g';
+				case 7: return 'h';
+				case 8: return 'i';
+				case 9: return 'j';
+				case 10: return 'k';
+				case 11: return 'l';
+				case 12: return 'm';
+				case 13: return 'n';
+				case 14: return 'o';
+				case 15: return 'p';
+				case 16: return 'q';
+				case 17: return 'r';
+				case 18: return 's';
+				case 19: return 't';
+				case 20: return 'u';
+				case 21: return 'v';
+				case 22: return 'w';
+				case 23: return 'x';
+				case 24: return 'y';
+				case 25: return 'z';
 			}
 		}
 		else if (type==Classificator.NUMBER) {
 			switch (i) {
-				case 0: return "0";
-				case 1: return "1";
-				case 2: return "2";
-				case 3: return "3";
-				case 4: return "4";
-				case 5: return "5";
-				case 6: return "6";
-				case 7: return "7";
-				case 8: return "8";
-				case 9: return "9";
+				case 0: return '0';
+				case 1: return '1';
+				case 2: return '2';
+				case 3: return '3';
+				case 4: return '4';
+				case 5: return '5';
+				case 6: return '6';
+				case 7: return '7';
+				case 8: return '8';
+				case 9: return '9';
 			}
 		}
 		else if (type==Classificator.ALPHA_AND_NUMBER) {
 			switch (i) {
-				case 0: return "0";
-				case 1: return "1";
-				case 2: return "2";
-				case 3: return "3";
-				case 4: return "4";
-				case 5: return "5";
-				case 6: return "6";
-				case 7: return "7";
-				case 8: return "8";
-				case 9: return "9";
-				case 10: return "a";
-				case 11: return "ą";
-				case 12: return "b";
-				case 13: return "c";
-				case 14: return "ć";
-				case 15: return "d";
-				case 16: return "e";
-				case 17: return "ę";
-				case 18: return "f";
-				case 19: return "g";
-				case 20: return "h";
-				case 21: return "i";
-				case 22: return "j";
-				case 23: return "k";
-				case 24: return "l";
-				case 25: return "ł";
-				case 26: return "m";
-				case 27: return "n";
-				case 28: return "ń";
-				case 29: return "o";
-				case 30: return "ó";
-				case 31: return "p";
-				case 32: return "q";
-				case 33: return "r";
-				case 34: return "s";
-				case 35: return "ś";
-				case 36: return "t";
-				case 37: return "u";
-				case 38: return "v";
-				case 39: return "w";
-				case 40: return "x";
-				case 41: return "y";
-				case 42: return "z";
-				case 43: return "ź";
-				case 44: return "ż";
+				case 0: return '0';
+				case 1: return '1';
+				case 2: return '2';
+				case 3: return '3';
+				case 4: return '4';
+				case 5: return '5';
+				case 6: return '6';
+				case 7: return '7';
+				case 8: return '8';
+				case 9: return '9';
+				case 10: return 'a';
+				case 11: return 'ą';
+				case 12: return 'b';
+				case 13: return 'c';
+				case 14: return 'ć';
+				case 15: return 'd';
+				case 16: return 'e';
+				case 17: return 'ę';
+				case 18: return 'f';
+				case 19: return 'g';
+				case 20: return 'h';
+				case 21: return 'i';
+				case 22: return 'j';
+				case 23: return 'k';
+				case 24: return 'l';
+				case 25: return 'ł';
+				case 26: return 'm';
+				case 27: return 'n';
+				case 28: return 'ń';
+				case 29: return 'o';
+				case 30: return 'ó';
+				case 31: return 'p';
+				case 32: return 'q';
+				case 33: return 'r';
+				case 34: return 's';
+				case 35: return 'ś';
+				case 36: return 't';
+				case 37: return 'u';
+				case 38: return 'v';
+				case 39: return 'w';
+				case 40: return 'x';
+				case 41: return 'y';
+				case 42: return 'z';
+				case 43: return 'ź';
+				case 44: return 'ż';
 			}
 		}
-		return "";
+		else if (type==Classificator.ALPHA_PL) {
+			switch (i) {
+				case 0: return 'a';
+				case 1: return 'ą';
+				case 2: return 'b';
+				case 3: return 'c';
+				case 4: return 'ć';
+				case 5: return 'd';
+				case 6: return 'e';
+				case 7: return 'ę';
+				case 8: return 'f';
+				case 9: return 'g';
+				case 10: return 'h';
+				case 11: return 'i';
+				case 12: return 'j';
+				case 13: return 'k';
+				case 14: return 'l';
+				case 15: return 'ł';
+				case 16: return 'm';
+				case 17: return 'n';
+				case 18: return 'ń';
+				case 19: return 'o';
+				case 20: return 'ó';
+				case 21: return 'p';
+				case 22: return 'q';
+				case 23: return 'r';
+				case 24: return 's';
+				case 25: return 'ś';
+				case 26: return 't';
+				case 27: return 'u';
+				case 28: return 'v';
+				case 29: return 'w';
+				case 30: return 'x';
+				case 31: return 'y';
+				case 32: return 'z';
+				case 33: return 'ź';
+				case 34: return 'ż';
+			}
+		}
+		return null;
 	}
 
 	public static Bitmap getBitmapFromGesture(Gesture in) {
@@ -245,20 +285,22 @@ public class Utils {
 		return new Point((int)centerx,(int)centery);
 	}
 	
-	public static void saveBitmap(Bitmap in,String filename) {
-		File file=new File(Environment.getExternalStorageDirectory(), filename);
-    	try {
-			FileOutputStream os=new FileOutputStream(file);
-			in.compress(Bitmap.CompressFormat.PNG, 100, os);
-			os.flush();
-			os.close();
-		}
-		catch (FileNotFoundException e) {} 
-		catch (IOException e) {}
+	public static File saveBitmap(Bitmap in,String filename) throws IOException {
+		File dir = new File(Environment.getExternalStorageDirectory() + "/scribedroid/");
+		Log.d("FILE CREATE", dir.getAbsolutePath());
+		if (!dir.exists()) dir.mkdirs();
+		File file=new File(dir , filename);
+
+		FileOutputStream os=new FileOutputStream(file);
+		in.compress(Bitmap.CompressFormat.PNG, 100, os);
+		os.flush();
+		os.close();
+		
+    	return file;
 	}
 	
-	public static void saveVector(float[] in,String filename) {
-		if (in.length!=VECTOR_LENGTH) return;
+	public static File saveVector(float[] in,String filename) throws Exception {
+		if (in.length!=VECTOR_LENGTH) throw new Exception("Vector length "+in.length);
 		int size=(int) Math.sqrt(in.length);
 		Bitmap output=Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
 		
@@ -267,11 +309,11 @@ public class Utils {
 			int x=i-28*y;
 			output.setPixel(x, y, toColor(in[i]));
 		}
-		saveBitmap(output,filename);
+		return saveBitmap(output,filename);
 	}
 	
-	public static List<Pair<Float,String>> getBest(float[] in,int n,int type) {
-		List<Pair<Float,String>> out=new ArrayList<Pair<Float,String>>();
+	public static List<Pair<Character,Float>> getBest(float[] in,int n,int type) {
+		List<Pair<Character,Float>> out=new ArrayList<Pair<Character,Float>>();
 	    List<Integer> indexList=new ArrayList<Integer>();
 	      
 	    for (int r=0;r<n;++r) {        
@@ -287,7 +329,7 @@ public class Utils {
 		    }
 		    
 		    if (imax==-1) return out;
-		    out.add(new Pair<Float,String>(in[imax],decode(imax,type)));
+		    out.add(new Pair<Character,Float>(decode(imax,type),in[imax]));
 	    }
 	    return out;
 	}
