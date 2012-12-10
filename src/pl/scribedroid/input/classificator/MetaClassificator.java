@@ -7,7 +7,7 @@ import java.util.List;
 
 import pl.scribedroid.R;
 import pl.scribedroid.input.Utils;
-import pl.scribedroid.input.ann.Network;
+import pl.scribedroid.input.ann.NetworkImpl;
 
 import com.google.inject.Inject;
 
@@ -21,8 +21,8 @@ import android.util.Log;
 public class MetaClassificator implements Classificator {
 private static final boolean DEBUG = true;
 	
-	private Network alphaNet;
-	private Network numberNet;
+	private NetworkImpl alphaNet;
+	private NetworkImpl numberNet;
 	
 	private GestureLibrary alphaLibrary;
 	private GestureLibrary numberLibrary;
@@ -41,8 +41,8 @@ private static final boolean DEBUG = true;
 			@Override
 			protected Void doInBackground(Void... params) {
 
-				alphaNet=Network.createFromRawResource(context, R.raw.alphanet);		
-				numberNet=Network.createFromRawResource(context, R.raw.numnet);
+				alphaNet=NetworkImpl.createFromRawResource(context, R.raw.alphanet);		
+				numberNet=NetworkImpl.createFromRawResource(context, R.raw.numnet);
 						
 				loadLibrary();
 				

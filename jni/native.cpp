@@ -4,7 +4,7 @@
 #include <string>
 #include <fstream>
 #include <stdlib.h>
-#include "BasicTrie.h"
+#include "dictionary/BasicTrie.h"
 
 #define LOGI(info) __android_log_write(ANDROID_LOG_INFO,"JNI",info)
 #define LOGE(error) __android_log_write(ANDROID_LOG_ERROR,"JNI",error)

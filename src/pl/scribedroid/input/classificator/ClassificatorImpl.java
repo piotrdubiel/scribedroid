@@ -10,7 +10,7 @@ import java.util.List;
 
 import pl.scribedroid.R;
 import pl.scribedroid.input.Utils;
-import pl.scribedroid.input.ann.Network;
+import pl.scribedroid.input.ann.NetworkImpl;
 import android.content.Context;
 import android.gesture.Gesture;
 import android.gesture.GestureLibraries;
@@ -26,8 +26,8 @@ import com.google.inject.Inject;
 public class ClassificatorImpl implements Classificator {
 	private static final boolean DEBUG = true;
 	
-	private Network alphaNet;
-	private Network numberNet;
+	private NetworkImpl alphaNet;
+	private NetworkImpl numberNet;
 	
 	private GestureLibrary alphaLibrary;
 	private GestureLibrary numberLibrary;
@@ -46,8 +46,8 @@ public class ClassificatorImpl implements Classificator {
 			@Override
 			protected Void doInBackground(Void... params) {
 
-				alphaNet=Network.createFromRawResource(context, R.raw.alphanet);		
-				numberNet=Network.createFromRawResource(context, R.raw.numnet);
+				alphaNet=NetworkImpl.createFromRawResource(context, R.raw.alphanet);		
+				numberNet=NetworkImpl.createFromRawResource(context, R.raw.numnet);
 						
 				loadLibrary();
 				
@@ -77,13 +77,13 @@ public class ClassificatorImpl implements Classificator {
 		
 		long startTime=System.currentTimeMillis();
 		
-		Network currentNet=null;
+		NetworkImpl currentNet=null;
 		GestureLibrary currentLibrary=null;
 		
-		Network ln = Network.createFromRawResource(context, R.raw.l_plus_n_net);
-		Network lon = Network.createFromRawResource(context, R.raw.l_or_n_net);
-		Network big = Network.createFromRawResource(context, R.raw.big_net);
-		Network small = Network.createFromRawResource(context, R.raw.small_net);
+		NetworkImpl ln = NetworkImpl.createFromRawResource(context, R.raw.l_plus_n_net);
+		NetworkImpl lon = NetworkImpl.createFromRawResource(context, R.raw.l_or_n_net);
+		NetworkImpl big = NetworkImpl.createFromRawResource(context, R.raw.big_net);
+		NetworkImpl small = NetworkImpl.createFromRawResource(context, R.raw.small_net);
 		
 		Bitmap in=Utils.getBitmapFromGesture(gesture);
 		

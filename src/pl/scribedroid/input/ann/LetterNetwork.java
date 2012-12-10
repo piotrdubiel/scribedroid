@@ -10,7 +10,7 @@ import pl.scribedroid.input.classificator.Classificator;
 import android.content.Context;
 import android.util.Pair;
 
-public class LetterNetwork extends Network {
+public class LetterNetwork extends NetworkImpl {
 
 	public LetterNetwork(int[] arch) {
 		super(arch);
@@ -20,8 +20,8 @@ public class LetterNetwork extends Network {
 		super();
 	}
 
-	public static Network createFromRawResource(Context context,int rid) {
-		return new LetterNetwork().load(context.getResources().openRawResource(rid));
+	public static NetworkImpl createFromRawResource(Context context,int rid) {
+		return (NetworkImpl) new LetterNetwork().load(context.getResources().openRawResource(rid));
 	}
 	
 	public ClassificationResult classify(float[] in) {
