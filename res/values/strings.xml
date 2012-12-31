@@ -18,11 +18,13 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Title for Latin keyboard  -->
+
+    <!-- Title for Latin keyboard -->
     <string name="ime_name">ScribeDroid Input</string>
 
     <!-- Symbols that are commonly considered word separators in this language -->
-    
+
+
     <!-- Labels on soft keys -->
     <string name="shiftKey">Shift</string>
     <string name="altKey">Alt</string>
@@ -36,44 +38,46 @@
     <string name="button_add">Add</string>
     <string name="button_reload">Reload</string>
     <string name="rename">Rename</string>
-    <string name="delete">Delete</string>    
+    <string name="delete">Delete</string>
     <string name="label_go_key">Go</string>
     <string name="label_next_key">Next</string>
     <string name="label_send_key">Send</string>
+
     <string-array name="librariesString">
-        <item >Letters</item>
-        <item >Numbers</item>
-        <item >Special characters</item>
+        <item>Letters</item>
+        <item>Numbers</item>
+        <item>Special characters</item>
     </string-array>
+
     <string name="special">!@#</string>
-    
+
     <string-array name="gestureInterval">
-		<item name="100">100 ms</item>
-		<item name="200">200 ms</item>
-		<item name="300">300 ms</item>
-		<item name="400">400 ms</item>
-		<item name="500">500 ms</item>
-		<item name="600">600 ms</item>
-		<item name="700">700 ms</item>
-		<item name="800">800 ms</item>
-		<item name="900">900 ms</item>
-		<item name="1000">1000 ms</item>
-	</string-array>    
-        
-	<string-array name="gestureIntervalValues">
-		<item name="100">100</item>
-		<item name="200">200</item>
-		<item name="300">300</item>
-		<item name="400">400</item>
-		<item name="500">500</item>
-		<item name="600">600</item>
-		<item name="700">700</item>
-		<item name="800">800</item>
-		<item name="900">900</item>
-		<item name="1000">1000</item>
-	</string-array>
-	<string name="word_separators">\u0020.,;:!?\n()[]*&amp;@{}/&lt;&gt;_+=|&quot;</string>
-	<string name="remove_word">Remove whole word</string>
-	<string name="autoOn">Auto</string>
+        <item name="100">100 ms</item>
+        <item name="200">200 ms</item>
+        <item name="300">300 ms</item>
+        <item name="400">400 ms</item>
+        <item name="500">500 ms</item>
+        <item name="600">600 ms</item>
+        <item name="700">700 ms</item>
+        <item name="800">800 ms</item>
+        <item name="900">900 ms</item>
+        <item name="1000">1000 ms</item>
+    </string-array>
+    <string-array name="gestureIntervalValues">
+        <item name="100">100</item>
+        <item name="200">200</item>
+        <item name="300">300</item>
+        <item name="400">400</item>
+        <item name="500">500</item>
+        <item name="600">600</item>
+        <item name="700">700</item>
+        <item name="800">800</item>
+        <item name="900">900</item>
+        <item name="1000">1000</item>
+    </string-array>
+
+    <string name="word_separators">\u0020.,;:!?\n()[]*&amp;@{}/&lt;&gt;_+=|&quot;</string>
+    <string name="remove_word">Remove whole word</string>
+    <string name="autoOn">Auto</string>
 
 </resources>

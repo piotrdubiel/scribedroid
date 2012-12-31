@@ -47,9 +47,16 @@ public class LayerImpl implements Layer {
 	public Vector get(int location) {
 		return neurons.get(location).weights;
 	}
-	
+
 	@Override
-	public int size() {
+	public int numberOfInputs() {
+		return neurons.get(0).weights.size();
+	}
+
+	@Override
+	public int numberOfOutputs() {
 		return neurons.size();
 	}
+	
+	
 }

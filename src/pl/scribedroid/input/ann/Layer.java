@@ -9,5 +9,6 @@ public interface Layer {
 	
 	public Vector get(int location);
 	
-	public int size();
+	public int numberOfInputs();
+	public int numberOfOutputs();
 }

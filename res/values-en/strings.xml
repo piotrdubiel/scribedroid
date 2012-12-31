@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="recognition_cat_title">Recognition parameters</string>
+    <string name="gest_interval_title">Gesture interval</string>
+    <string name="gest_interval_desc">Time betwwen finishing gesture and starting recognition</string>
+    <string name="dictionary_cat_title">Dictionary</string>
+    <string name="info_cat_title">Information</string>
+    <string name="dictionary_picker_title">Choose dictionaries</string>
+    <string name="train_gestures_title">Edit handwriting style</string>
+    <string name="train_gestures_desc">Write some characters to improve recognition quality</string>
+    <string name="character_prompt">Write character:</string>
+    <string name="next_button">Next</string>
+    <string name="back_button">Previous</string>
+    <string name="no_gesture_alert">Write character first!</string>
+    <string name="finish_button">Finish</string>
+    <string name="remove_word">Remove word</string>
+    <string name="use_dictionary_desc">Toggles on suggestion from dictionary</string>
+    <string name="use_dictionary_title">Use dictionary</string>
+    <string name="vibrate_on_title">Vibrate</string>
+    <string name="label_go_key">Go</string>
+    <string name="label_next_key">Next</string>
+    <string name="label_send_key">Send</string>
+
+</resources>
