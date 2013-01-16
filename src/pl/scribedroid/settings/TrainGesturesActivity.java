@@ -3,6 +3,7 @@ package pl.scribedroid.settings;
 import java.util.ArrayList;
 import pl.scribedroid.R;
 import pl.scribedroid.input.Utils;
+import pl.scribedroid.input.classificator.GestureLibraryClassificator;
 import android.app.Activity;
 import android.gesture.Gesture;
 import android.gesture.GestureLibraries;
@@ -54,7 +55,7 @@ public class TrainGesturesActivity extends Activity implements OnClickListener {
 	    //getFileStreamPath(ALPHA_FILENAME).delete();
 	    //getFileStreamPath(NUMBER_FILENAME).delete();
 	    
-	    currentLibrary=GestureLibraries.fromFile(getFileStreamPath(Utils.USER_ALPHA_FILENAME));
+	    currentLibrary=GestureLibraries.fromFile(getFileStreamPath(GestureLibraryClassificator.USER_ALPHA_FILENAME));
 	    currentLibrary.load();
 	    
 	    currentGesture=loadGesture(Character.toString(CHARACTERS.charAt(currentChar)));
@@ -106,7 +107,7 @@ public class TrainGesturesActivity extends Activity implements OnClickListener {
 				if (currentChar>=CHARACTERS.length()) currentChar=CHARACTERS.length()-1;
 				characterLabel.setText(Character.toString(CHARACTERS.charAt(currentChar)));				
 				if (CHARACTERS.charAt(currentChar)=='0') {
-					currentLibrary=GestureLibraries.fromFile(getFileStreamPath(Utils.USER_NUMBER_FILENAME));
+					currentLibrary=GestureLibraries.fromFile(getFileStreamPath(GestureLibraryClassificator.USER_NUMBER_FILENAME));
 					currentLibrary.load();
 				}
 				
@@ -133,7 +134,7 @@ public class TrainGesturesActivity extends Activity implements OnClickListener {
 			if (currentChar<0) currentChar=0;
 		    characterLabel.setText(Character.toString(CHARACTERS.charAt(currentChar)));
 		    if (CHARACTERS.charAt(currentChar)=='z') {
-		    	currentLibrary=GestureLibraries.fromFile(getFileStreamPath(Utils.USER_ALPHA_FILENAME));
+		    	currentLibrary=GestureLibraries.fromFile(getFileStreamPath(GestureLibraryClassificator.USER_ALPHA_FILENAME));
 		    	currentLibrary.load();
 		    }
 		    

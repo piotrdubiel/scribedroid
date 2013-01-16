@@ -14,4 +14,5 @@ public abstract class Dictionary {
 	public abstract void addWord(String word);
 	public abstract List<String> getSuggestions(String prefix);
 	public abstract boolean isValid(String word);
+	public abstract void close();
 }

@@ -10,6 +10,8 @@ import com.google.inject.util.Modules;
 import android.app.Application;
 
 public class ScribeDroidApplication extends Application {
+	public static final boolean DEBUG = true;
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();

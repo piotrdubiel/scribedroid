@@ -8,10 +8,9 @@
 
 
 extern "C" {
-int Java_pl_scribedroid_input_anny_NativeNetwork_createNetwork(JNIEnv* env, jobject thiz,jstring filename);
-void Java_pl_scribedroid_input_dictionary_NativeDictionary_closeNetwork(JNIEnv* env, jobject thiz,jint net);
-jfloatArray Java_pl_scribedroid_input_dictionary_NativeDictionary_answer(JNIEnv* env, jobject thiz, jfloatArray in);
-jfloatArray Java_pl_scribedroid_input_dictionary_NativeDictionary_train(JNIEnv* env, jobject thiz, jfloatArray in, jint label);
+int Java_pl_scribedroid_input_ann_NativeNetwork_load(JNIEnv* env, jobject thiz,jstring filename);
+void Java_pl_scribedroid_input_ann_NativeNetwork_close(JNIEnv* env, jobject thiz,jint net);
+jfloatArray Java_pl_scribedroid_input_ann_NativeNetwork_answer(JNIEnv* env, jobject thiz, jfloatArray in);
 };
 /*
 int Java_pl_scribedroid_input_dictionary_NativeDictionary_createDictionary(JNIEnv* env, jobject thiz,jstring filename) {

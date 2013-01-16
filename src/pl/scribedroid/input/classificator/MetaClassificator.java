@@ -1,170 +1,126 @@
 package pl.scribedroid.input.classificator;
 
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
 
 import pl.scribedroid.R;
 import pl.scribedroid.input.Utils;
+import pl.scribedroid.input.ann.Network;
 import pl.scribedroid.input.ann.NetworkImpl;
+import pl.scribedroid.input.classificator.ClassificationResult.Label;
+import android.content.Context;
+import android.gesture.Gesture;
+import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.google.inject.Inject;
 
-import android.content.Context;
-import android.gesture.Gesture;
-import android.gesture.GestureLibraries;
-import android.gesture.GestureLibrary;
-import android.os.AsyncTask;
-import android.util.Log;
-import android.util.Pair;
-
 public class MetaClassificator implements Classificator {
-	private static final boolean DEBUG = true;
-
-	private NetworkImpl alphaNet;
-	private NetworkImpl numberNet;
-
-	private GestureLibrary alphaLibrary;
-	private GestureLibrary numberLibrary;
-
-	private float[] mu;
-	private float[][] trmx;
-	private Context context;
-
 	private static final String TAG = "MetaClassificator";
+
+	private Network pl_small_net;
+	private Network pl_capital_net;
+	private Network digit_net;
+	private Network lod_net;
+	private Network cos_net;
+
+	private GestureLibraryClassificator alpha_library;
+	private GestureLibraryClassificator number_library;
+	private PCA pca;
+	private Context context;
 
 	@Inject
 	public MetaClassificator(Context c) {
-
 		context = c;
-		new AsyncTask<Void, Void, Void>() {
-			@Override
-			protected Void doInBackground(Void... params) {
-
-				alphaNet = NetworkImpl.createFromRawResource(context, R.raw.alphanet);
-				numberNet = NetworkImpl.createFromRawResource(context, R.raw.numnet);
-
-				loadLibrary();
-
-				if (DEBUG) {
-					Log.d(TAG, String.valueOf(alphaLibrary.getGestureEntries().size())
-							+ " gestures in alpha library");
-					Log.d(TAG, String.valueOf(numberLibrary.getGestureEntries().size())
-							+ " gestures in number library");
-				}
-
-				loadPCA();
-				return null;
-			}
-
-			@Override
-			protected void onPostExecute(Void result) {
-				Log.i(TAG, "Classificator loaded");
-				super.onPostExecute(result);
-				// inputView.setEnabled(true);
-			}
-		}.execute();
-	}
-
-	@Override
-	public Pair<Character, Float> classify(Gesture gesture, int type) {
-		return null;
-	}
-
-	@Override
-	public ClassificationResult classifiy(Gesture gesture, int type) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ClassificationResult classifiy(List<ClassificationResult> inputs) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private void loadPCA() {
-		InputStream file_input = context.getResources().openRawResource(R.raw.pca);
-
 		try {
-			DataInputStream data_in = new DataInputStream(file_input);
+			pca = new PCA(c);
 
-			if (DEBUG) Log.v(TAG, "Input loaded");
+			pl_small_net = NetworkImpl.createFromInputStream(context.getAssets().open("pl_small_net"), Classificator.SMALL_ALPHA);
+			pl_capital_net = NetworkImpl.createFromInputStream(context.getAssets().open("pl_capital_net"), Classificator.CAPITAL_ALPHA);
+			digit_net = NetworkImpl.createFromInputStream(context.getAssets().open("digit_net"), Classificator.NUMBER);
+			lod_net = NetworkImpl.createFromInputStream(context.getAssets().open("lod_net"), Classificator.GROUP
+					| Classificator.CAPITAL_ALPHA
+					| Classificator.SMALL_ALPHA
+					| Classificator.NUMBER);
+			cos_net = NetworkImpl.createFromInputStream(context.getAssets().open("cos_net"), Classificator.GROUP);
 
-			int muSize = data_in.readInt();
-			mu = new float[muSize];
-
-			for (int i = 0; i < muSize; ++i) {
-				mu[i] = data_in.readFloat();
+			alpha_library = new GestureLibraryClassificator(c, GestureLibraryClassificator.USER_ALPHA_FILENAME);
+			if (!alpha_library.isValid()) {
+				alpha_library = new GestureLibraryClassificator(c, R.raw.default_alpha_lib);
 			}
 
-			if (DEBUG) Log.v(TAG, "MU " + String.valueOf(muSize) + " loaded");
-
-			int trmxRows = data_in.readInt();
-			int trmxCols = data_in.readInt();
-
-			trmx = new float[trmxRows][trmxCols];
-
-			for (int i = 0; i < trmxRows; ++i) {
-				for (int j = 0; j < trmxCols; ++j) {
-					trmx[i][j] = data_in.readFloat();
-				}
+			number_library = new GestureLibraryClassificator(c, GestureLibraryClassificator.USER_NUMBER_FILENAME);
+			if (!number_library.isValid()) {
+				number_library = new GestureLibraryClassificator(c, R.raw.default_number_lib);
 			}
-			if (DEBUG) Log.v(TAG, "TRMX " + String.valueOf(trmxRows) + "x"
-					+ String.valueOf(trmxCols) + " loaded");
 
-			data_in.close();
 		}
 		catch (IOException e) {
-			System.out.println("PCA IO Exception LOADING =: " + e);
+			e.printStackTrace();
 		}
+
+		Log.i(TAG, "Classificator loaded");
 	}
 
-	private Character getCharacter(String name) {
-		return name.charAt(0);
-	}
+	@Override
+	public ClassificationResult classify(Gesture gesture, int type) {
+		float[] sample = prepare(gesture);
+		ClassificationResult result = null;
+		Log.i(TAG, "First type: " + type + " "
+				+ (Classificator.SMALL_ALPHA | Classificator.CAPITAL_ALPHA | Classificator.NUMBER));
+		if (type == (Classificator.SMALL_ALPHA | Classificator.CAPITAL_ALPHA | Classificator.NUMBER)) {
+			try {
+				ClassificationResult pl_small = pl_small_net.classify(sample);
+				for (Label l : pl_small.result)
+					Log.i(TAG, "Small: " + l.label + " " + l.belief);
+				ClassificationResult pl_capital = pl_capital_net.classify(sample);
+				for (Label l : pl_capital.result)
+					Log.i(TAG, "Capital: " + l.label + " " + l.belief);
+				ClassificationResult digit = digit_net.classify(sample);
+				for (Label l : digit.result)
+					Log.i(TAG, "Digit: " + l.label + " " + l.belief);
+				ClassificationResult lod = lod_net.classify(sample);
+				for (Label l : lod.result)
+					Log.i(TAG, "LOD: " + l.label + " " + l.belief);
+				ClassificationResult cos = cos_net.classify(sample);
+				for (Label l : cos.result)
+					Log.i(TAG, "COS: " + l.label + " " + l.belief);
+				ClassificationResult alpha_lib = alpha_library.classify(gesture,Classificator.CAPITAL_ALPHA);
+				for (Label l : alpha_lib.result)
+					Log.i(TAG, "ALPHA lib: " + l.label + " " + l.belief);				
+				ClassificationResult number_lib = number_library.classify(gesture,Classificator.NUMBER);
+				for (Label l : number_lib.result)
+					Log.i(TAG, "NUMBER lib: " + l.label + " " + l.belief);
 
-	private void loadLibrary() {
-		GestureLibrary userAlpha = GestureLibraries.fromPrivateFile(context, Utils.USER_ALPHA_FILENAME);
-		if (!validLibrary(userAlpha)) {
-			alphaLibrary = GestureLibraries.fromRawResource(context, R.raw.default_alpha_lib);
-			if (DEBUG) Log.d(TAG, "USER lib for alphas not valid - using default");
-		}
-		else {
-			alphaLibrary = userAlpha;
-			if (DEBUG) Log.d(TAG, "USER lib for alphas - OK");
-		}
+				// result = result.combine(cos_net.classify(sample));
 
-		GestureLibrary userNumber = GestureLibraries.fromPrivateFile(context, Utils.USER_NUMBER_FILENAME);
-		if (!validLibrary(userNumber)) {
-			numberLibrary = GestureLibraries.fromRawResource(context, R.raw.default_number_lib);
-			if (DEBUG) Log.d(TAG, "USER lib for numbers not valid - using default");
-		}
-		else {
-			numberLibrary = userNumber;
-			if (DEBUG) Log.d(TAG, "USER lib for numbers - OK");
-		}
-
-		alphaLibrary.load();
-		numberLibrary.load();
-	}
-
-	private boolean validLibrary(GestureLibrary lib) {
-		if (lib != null) {
-			if (lib.load() && lib.getGestureEntries().size() > 0) {
-				if (lib.getGestureEntries().contains("a")
-						&& lib.getGestureEntries().size() == 26) {
-					return true;
-				}
-				else if (lib.getGestureEntries().contains("0")
-						&& lib.getGestureEntries().size() == 10) {
-					return true;
-				}
-				return false;
+				result = pl_capital;
+			}
+			catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
-		return false;
+
+		return result;
 	}
 
+	private float[] prepare(Gesture gesture) {
+		Bitmap in = Utils.getBitmapFromGesture(gesture);
+		if (in == null) return null;
+		if (in.getWidth() > in.getHeight()) {
+			in = Bitmap.createScaledBitmap(in, 20, Math.max(20 * in.getHeight() / in.getWidth(), 1), true);
+		}
+		else {
+			in = Bitmap.createScaledBitmap(in, Math.max(20 * in.getWidth() / in.getHeight(), 1), 20, true);
+		}
+
+		float[] sample = Utils.getVectorFromBitmap(in);
+
+		return pca.applyPCA(sample);
+	}
+
+	@Override
+	public ClassificationResult classify(float[] sample) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -9,13 +9,11 @@ import roboguice.inject.InjectResource;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.inputmethodservice.InputMethodService;
-import android.inputmethodservice.KeyboardView;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.widget.Toast;
 
@@ -28,11 +26,8 @@ public class ScribeDroid extends InputMethodService implements
 	private InputMethodController currentInputMethod;
 	private GestureInputMethod gestureInputMethod;
 	private InputMethodController keyboardInputMethod;
-	private KeyboardView standardKeyboardView;
 
 	private boolean completionOn;
-
-	private int lastWordStart = 0;
 
 	private SuggestionManager suggest;
 
@@ -46,8 +41,7 @@ public class ScribeDroid extends InputMethodService implements
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		RoboGuice.getBaseApplicationInjector(getApplication()).injectMembers(
-				this);
+		RoboGuice.getBaseApplicationInjector(getApplication()).injectMembers(this);
 	}
 
 	@Override
@@ -56,11 +50,10 @@ public class ScribeDroid extends InputMethodService implements
 
 	@Override
 	public View onCreateInputView() {
-		PreferenceManager.getDefaultSharedPreferences(this)
-				.registerOnSharedPreferenceChangeListener(this);
+		PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
 
 		gestureInputMethod = new GestureInputMethod(this);
-		keyboardInputMethod = new GestureInputMethod(this);
+		keyboardInputMethod = new KeyboardInputMethod(this);
 		currentInputMethod = gestureInputMethod;
 
 		loadPreferences();
@@ -107,8 +100,7 @@ public class ScribeDroid extends InputMethodService implements
 	public void onUpdateSelection(int oldSelStart, int oldSelEnd,
 			int newSelStart, int newSelEnd, int candidatesStart,
 			int candidatesEnd) {
-		super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd,
-				candidatesStart, candidatesEnd);
+		super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd);
 		if (composing_text.length() > 0
 				&& (newSelStart != candidatesEnd || newSelEnd != candidatesEnd)) {
 			composing_text.setLength(0);
@@ -163,11 +155,9 @@ public class ScribeDroid extends InputMethodService implements
 		if (composing_text.length() > 0) {
 			ic.commitText(composing_text, composing_text.length());
 			if (suggest != null & suggest.isReady()) {
-				Log.i(TAG,
-						"Word " + composing_text + " is valid: "
-								+ suggest.isValid(composing_text.toString()));
-				if (suggest.isValid(composing_text.toString())) suggest
-						.addToDictionary(composing_text.toString());
+				Log.i(TAG, "Word " + composing_text + " is valid: "
+						+ suggest.isValid(composing_text.toString()));
+				if (suggest.isValid(composing_text.toString())) suggest.addToDictionary(composing_text.toString());
 			}
 			composing_text.setLength(0);
 			refreshSuggestions();
@@ -179,13 +169,13 @@ public class ScribeDroid extends InputMethodService implements
 
 		InputConnection ic = getCurrentInputConnection();
 
+		composing_text.append(c);
 		if (!word_separators.contains(c.toString())) {
-			composing_text.append(c);
 			ic.setComposingText(composing_text, composing_text.length());
 		}
 		else {
 			commitText();
-			ic.commitText(c.toString(), 1);
+			//ic.commitText(c.toString(), 1);
 		}
 
 		// recentLabel.setText(c.toString());
@@ -194,25 +184,36 @@ public class ScribeDroid extends InputMethodService implements
 		currentInputMethod.resetModifiers();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.inputmethodservice.InputMethodService#onDestroy()
+	 */
+	@Override
+	public void onDestroy() {
+		Log.i(TAG, "Destroy called - closing databases");
+		super.onDestroy();
+		suggest.close();
+	}
+
 	void delete() {
 		InputConnection ic = getCurrentInputConnection();
 		if (composing_text.length() > 0) {
-			composing_text.setLength(0);
+			composing_text.deleteCharAt(composing_text.length() - 1);
 			ic.setComposingText(composing_text, composing_text.length());
 		}
 		else {
 			ic.deleteSurroundingText(1, 0);
 		}
+		refreshSuggestions();
 	}
 
 	void pickSuggestion(String word) {
 		if (completionOn) {
-			getCurrentInputConnection().deleteSurroundingText(lastWordStart, 0);
-			getCurrentInputConnection().commitText(word, 0);
+			getCurrentInputConnection().commitText(word, word.length());
 			if (!suggest.isValid(word)) {
 				suggest.addToUserDictionary(word);
-				Toast.makeText(this, "Added " + word + " to dictionary",
-						Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "Added " + word + " to dictionary", Toast.LENGTH_SHORT).show();
 			}
 			setCandidatesViewShown(false);
 		}
@@ -251,8 +252,7 @@ public class ScribeDroid extends InputMethodService implements
 			if (composing_text.length() > 0) {
 				String word = composing_text.toString();
 				List<String> suggestions = suggest.getSuggestions(word);
-				candidateView
-						.setSuggestions(suggestions, suggest.isValid(word));
+				candidateView.setSuggestions(suggestions, suggest.isValid(word));
 				setCandidatesViewShown(true);
 
 			}
@@ -261,22 +261,19 @@ public class ScribeDroid extends InputMethodService implements
 		else setCandidatesViewShown(false);
 	}
 
-	private void switchInputMethod() {
+	public void switchInputMethod() {
 		if (currentInputMethod == gestureInputMethod) currentInputMethod = keyboardInputMethod;
 		else if (currentInputMethod == keyboardInputMethod) currentInputMethod = gestureInputMethod;
+		setInputView(currentInputMethod.inputView);
 	}
 
 	private void loadPreferences() {
-		SharedPreferences sharedPrefs = PreferenceManager
-				.getDefaultSharedPreferences(this);
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-		gestureInputMethod.gestureInterval = Integer.parseInt(sharedPrefs
-				.getString("gesture_interval", "300"));
-		gestureInputMethod.gestureView
-				.setFadeOffset(gestureInputMethod.gestureInterval);
-		Log.d(TAG,
-				"Interval preference: "
-						+ String.valueOf(gestureInputMethod.gestureInterval));
+		gestureInputMethod.gestureInterval = Integer.parseInt(sharedPrefs.getString("gesture_interval", "300"));
+		gestureInputMethod.gestureView.setFadeOffset(gestureInputMethod.gestureInterval);
+		Log.d(TAG, "Interval preference: "
+				+ String.valueOf(gestureInputMethod.gestureInterval));
 
 		completionOn = sharedPrefs.getBoolean("use_dictionary", true);
 		Log.d(TAG, "Completion: " + String.valueOf(completionOn));
@@ -294,9 +291,7 @@ public class ScribeDroid extends InputMethodService implements
 
 	void vibrate() {
 		if (vibrateOn) {
-			currentInputMethod.inputView.performHapticFeedback(
-					HapticFeedbackConstants.KEYBOARD_TAP,
-					HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+			currentInputMethod.inputView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
 		}
 	}
 

@@ -12,7 +12,7 @@
 
 extern "C" {
 int JNICALL Java_pl_scribedroid_input_dictionary_NativeDictionary_createDictionary(
-		JNIEnv* env, jobject thiz, jstring filename);
+		JNIEnv* env, jobject thiz, jstring filename, jint freq_limit);
 void JNICALL Java_pl_scribedroid_input_dictionary_NativeDictionary_closeDictionary(
 		JNIEnv* env, jobject thiz, jint dict);
 jobjectArray JNICALL Java_pl_scribedroid_input_dictionary_NativeDictionary_suggest(
@@ -22,31 +22,19 @@ jboolean JNICALL Java_pl_scribedroid_input_dictionary_NativeDictionary_isValid(
 }
 ;
 
-static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
-	int i;
-	for (i = 0; i < argc; i++) {
-		LOGI(argv[i] ? argv[i] : "NULL");
-	}
-	return 0;
-}
-
 int Java_pl_scribedroid_input_dictionary_NativeDictionary_createDictionary(
-		JNIEnv* env, jobject thiz, jstring filename) {
+		JNIEnv* env, jobject thiz, jstring filename, jint freq_limit) {
 	const char* filename_chars = env->GetStringUTFChars(filename, 0);
 
 	LOGI("Start creating dictionary");
-	BasicTrie * dict = new BasicTrie();
-	/*std::ifstream is(filenameChars);
+	BasicTrie* dict = new BasicTrie();
 
-	 std::string line;
-	 while (getline(is,line)) {
-	 dict->add(line);
-	 }*/
-
-	sqlite3 *db;
+	sqlite3* db;
 	int rc;
 	char* error_message;
-	const char* sql_text = "select word from words";
+	char* sql_text = new char[100];
+	sprintf(sql_text, "select word from words where frequency>%d;", (int) freq_limit);
+	LOGI(sql_text);
 	int sql_length = strlen(sql_text) + 1;
 	sqlite3_stmt* sql_statement;
 
@@ -57,16 +45,14 @@ int Java_pl_scribedroid_input_dictionary_NativeDictionary_createDictionary(
 		return 0;
 	}
 	LOGI(filename_chars);
-	//rc = sqlite3_exec(db, "select word from words;", callback, 0, &error_message);
 	sqlite3_prepare_v2(db, sql_text, sql_length, &sql_statement, NULL);
 
 	while (true) {
 		rc = sqlite3_step(sql_statement);
 		if (rc == SQLITE_ROW) {
 			int bytes;
-			std::string word = std::string(
-					reinterpret_cast<const char*>(sqlite3_column_text(
-							sql_statement, 0)));
+			std::string word =
+					std::string(reinterpret_cast<const char*>(sqlite3_column_text(sql_statement, 0)));
 			dict->add(word);
 		}
 		else if (rc == SQLITE_DONE) {
@@ -105,8 +91,8 @@ jobjectArray Java_pl_scribedroid_input_dictionary_NativeDictionary_suggest(
 
 	const char* prefixChars = env->GetStringUTFChars(prefix, 0);
 
-	std::vector<std::string> suggestions = dictionary->suggest(prefixChars,
-			limit);
+	std::vector<std::string> suggestions =
+			dictionary->suggest(prefixChars, limit);
 
 	if (suggestions.size() > 0) {
 		stringClass = env->FindClass("java/lang/String");
@@ -114,8 +100,7 @@ jobjectArray Java_pl_scribedroid_input_dictionary_NativeDictionary_suggest(
 		strArray = env->NewObjectArray(suggestions.size(), stringClass, NULL);
 
 		if (env->ExceptionCheck()) {
-			fprintf(stderr,
-					"Got exception while creating String array or getting String class\n");
+			fprintf(stderr, "Got exception while creating String array or getting String class\n");
 			env->DeleteLocalRef(stringClass);
 			env->DeleteLocalRef(strArray);
 		}

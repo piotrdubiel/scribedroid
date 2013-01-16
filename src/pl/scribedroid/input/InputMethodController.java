@@ -1,6 +1,5 @@
 package pl.scribedroid.input;
 
-import pl.scribedroid.R;
 import roboguice.RoboGuice;
 import android.view.View;
 

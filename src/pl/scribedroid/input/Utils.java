@@ -18,12 +18,13 @@ import android.util.Pair;
 import android.view.KeyEvent;
 
 public class Utils {
-	public static final String USER_ALPHA_FILENAME = "user_alpha_lib";
-	public static final String USER_NUMBER_FILENAME = "user_number_lib";
 	public static final int TRAINING_CYCLES = 100;
 
 	private static final int VECTOR_LENGTH = 784;
 	public static final int RESULT_COUNT = 4;
+	public static final char[] LETTERS = { 'a', 'ą', 'b', 'c', 'ć', 'd', 'e', 'ę', 'f', 'g', 'h',
+			'j', 'k', 'l', 'ł', 'm', 'n', 'ń', 'o', 'ó', 'p', 'q', 'r', 's', 'ś', 't', 'u', 'v',
+			'w', 'x', 'y', 'z', 'ź', 'ż' };
 
 	public static List<Gesture> getAllPossibleGestures(Gesture g) {
 		List<Gesture> gestures = new ArrayList<Gesture>();
@@ -51,7 +52,7 @@ public class Utils {
 		}
 		return gestures;
 	}
-	
+
 	public static List<Gesture> getPossibleGestures(Gesture g) {
 		List<Gesture> gestures = new ArrayList<Gesture>();
 		List<GestureStroke> strokes = g.getStrokes();
@@ -129,167 +130,110 @@ public class Utils {
 
 	public static int toColor(float gray) {
 		int color;
-		color = (255 << 24) | ((int) gray * 255 << 16)
-				| ((int) gray * 255 << 8) | (int) gray * 255;
+		color = (255 << 24) | ((int) gray * 255 << 16) | ((int) gray * 255 << 8) | (int) gray * 255;
 		return color;
 	}
 
 	public static int code(Character i, int type) {
-		if (type == Classificator.ALPHA_AND_NUMBER) {
-			switch (i) {
-			case '0':
-				return 0;
-			case '1':
-				return 1;
-			case '2':
-				return 2;
-			case '3':
-				return 3;
-			case '4':
-				return 4;
-			case '5':
-				return 5;
-			case '6':
-				return 6;
-			case '7':
-				return 7;
-			case '8':
-				return 8;
-			case '9':
-				return 9;
-			case 'a':
-				return 10;
-			case 'ą':
-				return 11;
-			case 'b':
-				return 12;
-			case 'c':
-				return 13;
-			case 'ć':
-				return 14;
-			case 'd':
-				return 15;
-			case 'e':
-				return 16;
-			case 'ę':
-				return 17;
-			case 'f':
-				return 18;
-			case 'g':
-				return 19;
-			case 'h':
-				return 20;
-			case 'i':
-				return 21;
-			case 'j':
-				return 22;
-			case 'k':
-				return 23;
-			case 'l':
-				return 24;
-			case 'ł':
-				return 25;
-			case 'm':
-				return 26;
-			case 'n':
-				return 27;
-			case 'ń':
-				return 28;
-			case 'o':
-				return 29;
-			case 'ó':
-				return 30;
-			case 'p':
-				return 31;
-			case 'q':
-				return 32;
-			case 'r':
-				return 33;
-			case 's':
-				return 34;
-			case 'ś':
-				return 35;
-			case 't':
-				return 36;
-			case 'u':
-				return 37;
-			case 'v':
-				return 38;
-			case 'w':
-				return 39;
-			case 'x':
-				return 40;
-			case 'y':
-				return 41;
-			case 'z':
-				return 42;
-			case 'ź':
-				return 43;
-			case 'ż':
-				return 44;
-			}
-		}
+		// if (type == Classificator.ALPHA_AND_NUMBER) {
+		// switch (i) {
+		// case '0':
+		// return 0;
+		// case '1':
+		// return 1;
+		// case '2':
+		// return 2;
+		// case '3':
+		// return 3;
+		// case '4':
+		// return 4;
+		// case '5':
+		// return 5;
+		// case '6':
+		// return 6;
+		// case '7':
+		// return 7;
+		// case '8':
+		// return 8;
+		// case '9':
+		// return 9;
+		// case 'a':
+		// return 10;
+		// case 'ą':
+		// return 11;
+		// case 'b':
+		// return 12;
+		// case 'c':
+		// return 13;
+		// case 'ć':
+		// return 14;
+		// case 'd':
+		// return 15;
+		// case 'e':
+		// return 16;
+		// case 'ę':
+		// return 17;
+		// case 'f':
+		// return 18;
+		// case 'g':
+		// return 19;
+		// case 'h':
+		// return 20;
+		// case 'i':
+		// return 21;
+		// case 'j':
+		// return 22;
+		// case 'k':
+		// return 23;
+		// case 'l':
+		// return 24;
+		// case 'ł':
+		// return 25;
+		// case 'm':
+		// return 26;
+		// case 'n':
+		// return 27;
+		// case 'ń':
+		// return 28;
+		// case 'o':
+		// return 29;
+		// case 'ó':
+		// return 30;
+		// case 'p':
+		// return 31;
+		// case 'q':
+		// return 32;
+		// case 'r':
+		// return 33;
+		// case 's':
+		// return 34;
+		// case 'ś':
+		// return 35;
+		// case 't':
+		// return 36;
+		// case 'u':
+		// return 37;
+		// case 'v':
+		// return 38;
+		// case 'w':
+		// return 39;
+		// case 'x':
+		// return 40;
+		// case 'y':
+		// return 41;
+		// case 'z':
+		// return 42;
+		// case 'ź':
+		// return 43;
+		// case 'ż':
+		// return 44;
+		// }
+		// }
 		return 0;
 	}
 
 	public static Character decode(int i, int type) {
-		if (type == Classificator.ALPHA) {
-			switch (i) {
-			case 0:
-				return 'a';
-			case 1:
-				return 'b';
-			case 2:
-				return 'c';
-			case 3:
-				return 'd';
-			case 4:
-				return 'e';
-			case 5:
-				return 'f';
-			case 6:
-				return 'g';
-			case 7:
-				return 'h';
-			case 8:
-				return 'i';
-			case 9:
-				return 'j';
-			case 10:
-				return 'k';
-			case 11:
-				return 'l';
-			case 12:
-				return 'm';
-			case 13:
-				return 'n';
-			case 14:
-				return 'o';
-			case 15:
-				return 'p';
-			case 16:
-				return 'q';
-			case 17:
-				return 'r';
-			case 18:
-				return 's';
-			case 19:
-				return 't';
-			case 20:
-				return 'u';
-			case 21:
-				return 'v';
-			case 22:
-				return 'w';
-			case 23:
-				return 'x';
-			case 24:
-				return 'y';
-			case 25:
-				return 'z';
-			}
-		}
-		else if (type == Classificator.NUMBER) {
+		if (type == Classificator.NUMBER) {
 			switch (i) {
 			case 0:
 				return '0';
@@ -313,101 +257,7 @@ public class Utils {
 				return '9';
 			}
 		}
-		else if (type == Classificator.ALPHA_AND_NUMBER) {
-			switch (i) {
-			case 0:
-				return '0';
-			case 1:
-				return '1';
-			case 2:
-				return '2';
-			case 3:
-				return '3';
-			case 4:
-				return '4';
-			case 5:
-				return '5';
-			case 6:
-				return '6';
-			case 7:
-				return '7';
-			case 8:
-				return '8';
-			case 9:
-				return '9';
-			case 10:
-				return 'a';
-			case 11:
-				return 'ą';
-			case 12:
-				return 'b';
-			case 13:
-				return 'c';
-			case 14:
-				return 'ć';
-			case 15:
-				return 'd';
-			case 16:
-				return 'e';
-			case 17:
-				return 'ę';
-			case 18:
-				return 'f';
-			case 19:
-				return 'g';
-			case 20:
-				return 'h';
-			case 21:
-				return 'i';
-			case 22:
-				return 'j';
-			case 23:
-				return 'k';
-			case 24:
-				return 'l';
-			case 25:
-				return 'ł';
-			case 26:
-				return 'm';
-			case 27:
-				return 'n';
-			case 28:
-				return 'ń';
-			case 29:
-				return 'o';
-			case 30:
-				return 'ó';
-			case 31:
-				return 'p';
-			case 32:
-				return 'q';
-			case 33:
-				return 'r';
-			case 34:
-				return 's';
-			case 35:
-				return 'ś';
-			case 36:
-				return 't';
-			case 37:
-				return 'u';
-			case 38:
-				return 'v';
-			case 39:
-				return 'w';
-			case 40:
-				return 'x';
-			case 41:
-				return 'y';
-			case 42:
-				return 'z';
-			case 43:
-				return 'ź';
-			case 44:
-				return 'ż';
-			}
-		}
-		else if (type == Classificator.ALPHA_PL) {
+		else if (type == Classificator.SMALL_ALPHA) {
 			switch (i) {
 			case 0:
 				return 'a';
@@ -480,15 +330,25 @@ public class Utils {
 			case 34:
 				return 'ż';
 			}
+		}
+		else if (type == Classificator.CAPITAL_ALPHA) {
+			return Character.toUpperCase(decode(i, Classificator.SMALL_ALPHA));
+		}
+		else if (type == (Classificator.CAPITAL_ALPHA | Classificator.SMALL_ALPHA)) {
+			if (i < 35) return decode(i, Classificator.CAPITAL_ALPHA);
+			else return decode(i - 35, Classificator.SMALL_ALPHA);
+		}
+		else if (type == (Classificator.CAPITAL_ALPHA | Classificator.SMALL_ALPHA | Classificator.NUMBER)) {
+			if (i < 10) return decode(i, Classificator.NUMBER);
+			if (i >= 10 && i < 45) return decode(i - 10, Classificator.CAPITAL_ALPHA);
+			else return decode(i - 45, Classificator.SMALL_ALPHA);
 		}
 		return null;
 	}
 
 	public static Bitmap getBitmapFromGesture(Gesture in) {
-		int width = (int) Math.abs(in.getBoundingBox().right
-				- in.getBoundingBox().left);
-		int height = (int) Math.abs(in.getBoundingBox().top
-				- in.getBoundingBox().bottom);
+		int width = (int) Math.abs(in.getBoundingBox().right - in.getBoundingBox().left);
+		int height = (int) Math.abs(in.getBoundingBox().top - in.getBoundingBox().bottom);
 
 		if (width <= 0 || height <= 0) return null;
 
@@ -549,10 +409,8 @@ public class Utils {
 		return new Point((int) centerx, (int) centery);
 	}
 
-	public static File saveBitmap(Bitmap in, String filename)
-			throws IOException {
-		File dir = new File(Environment.getExternalStorageDirectory()
-				+ "/scribedroid/");
+	public static File saveBitmap(Bitmap in, String filename) throws IOException {
+		File dir = new File(Environment.getExternalStorageDirectory() + "/scribedroid/");
 		Log.d("FILE CREATE", dir.getAbsolutePath());
 		if (!dir.exists()) dir.mkdirs();
 		File file = new File(dir, filename);
@@ -566,11 +424,9 @@ public class Utils {
 	}
 
 	public static File saveVector(float[] in, String filename) throws Exception {
-		if (in.length != VECTOR_LENGTH) throw new Exception("Vector length "
-				+ in.length);
+		if (in.length != VECTOR_LENGTH) throw new Exception("Vector length " + in.length);
 		int size = (int) Math.sqrt(in.length);
-		Bitmap output = Bitmap
-				.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+		Bitmap output = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
 
 		for (int i = 0; i < in.length; ++i) {
 			int y = (int) Math.floor(i / 28);
@@ -580,8 +436,7 @@ public class Utils {
 		return saveBitmap(output, filename);
 	}
 
-	public static List<Pair<Character, Float>> getBest(float[] in, int n,
-			int type) {
+	public static List<Pair<Character, Float>> getBest(float[] in, int n, int type) {
 		List<Pair<Character, Float>> out = new ArrayList<Pair<Character, Float>>();
 		List<Integer> indexList = new ArrayList<Integer>();
 

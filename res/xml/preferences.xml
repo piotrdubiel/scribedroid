@@ -31,6 +31,11 @@
             android:key="use_dictionary"
             android:summary="@string/use_dictionary_desc"
             android:title="@string/use_dictionary_title" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="use_trigrams"
+            android:summary="@string/use_trigrams_desc"
+            android:title="@string/use_trigrams_title" />
     </PreferenceCategory>
     <PreferenceCategory
         android:key="help_category"

@@ -20,5 +20,7 @@
     <string name="label_go_key">Idź</string>
     <string name="label_next_key">Dalej</string>
     <string name="label_send_key">Wyślij</string>
-
+    <string name="dict_notification_title_text">Tworzenie słownika z pliku</string>
+	<string name="use_trigrams_title">Używaj trigramów</string>
+	<string name="use_trigrams_desc">Wspomoga rozpoznawanie bazą trigramów</string>
 </resources>

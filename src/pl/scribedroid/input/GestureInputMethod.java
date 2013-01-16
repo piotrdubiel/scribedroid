@@ -1,25 +1,20 @@
 package pl.scribedroid.input;
 
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-
 import pl.scribedroid.R;
+import pl.scribedroid.input.classificator.ClassificationResult;
+import pl.scribedroid.input.classificator.ClassificationResult.Label;
 import pl.scribedroid.input.classificator.Classificator;
 import pl.scribedroid.settings.SettingsActivity;
-import pl.scribedroid.training.TrainingService;
 import roboguice.inject.InjectResource;
 import android.content.Intent;
 import android.gesture.Gesture;
 import android.gesture.GestureOverlayView;
 import android.gesture.GestureOverlayView.OnGestureListener;
-import android.graphics.Color;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
 import android.inputmethodservice.KeyboardView.OnKeyboardActionListener;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -37,25 +32,25 @@ import com.google.inject.Inject;
 public class GestureInputMethod extends InputMethodController implements
 		OnClickListener, OnLongClickListener {
 	private static final String TAG = "GestureInput";
-	/* @InjectView(R.id.altKey) */ToggleButton altKey;
-	/* @InjectView(R.id.shiftKey) */ToggleButton shiftKey;
-	/* @InjectView(R.id.typeSwitch) */Button typeSwitch;
-	/* @InjectView(R.id.deleteKey) */ImageButton deleteKey;
-	/* @InjectView(R.id.enterKey) */ImageButton enterKey;
-	/* @InjectView(R.id.spaceKey) */ImageButton spaceKey;
-	/* @InjectView(R.id.symbolSwitch) */ToggleButton symbolSwitch;
-	/* @InjectView(R.id.support_keyboard) */KeyboardView supportSymbolKeyboardView;
-	/* @InjectView(R.id.gestures_overlay) */GestureOverlayView gestureView;
-	/* @InjectView(R.id.recentLabel) */TextView recentLabel;
+	ToggleButton altKey;
+	ToggleButton shiftKey;
+	Button typeSwitch;
+	ImageButton deleteKey;
+	ImageButton enterKey;
+	ImageButton spaceKey;
+	ToggleButton symbolSwitch;
+	KeyboardView supportSymbolKeyboardView;
+	GestureOverlayView gestureView;
+	TextView recentLabel;
+	ImageButton keyboardSwitch;
 
 	@InjectResource(R.string.word_separators)
-	String wordSeparators;
+	String word_separators;
 
 	@Inject
 	Classificator classHandler;
 
 	int gestureInterval;
-	int currentType;
 	boolean capsLock = false;
 
 	private Character current_result;
@@ -73,7 +68,8 @@ public class GestureInputMethod extends InputMethodController implements
 		supportSymbolKeyboardView = (KeyboardView) inputView.findViewById(R.id.support_keyboard);
 		gestureView = (GestureOverlayView) inputView.findViewById(R.id.gesture_overlay);
 		recentLabel = (TextView) inputView.findViewById(R.id.recentLabel);
-
+		keyboardSwitch = (ImageButton) inputView.findViewById(R.id.keyboardToggle);
+		
 		altKey.setOnClickListener(this);
 		shiftKey.setOnClickListener(this);
 		shiftKey.setOnLongClickListener(this);
@@ -84,13 +80,14 @@ public class GestureInputMethod extends InputMethodController implements
 		enterKey.setOnLongClickListener(this);
 		spaceKey.setOnClickListener(this);
 		symbolSwitch.setOnClickListener(this);
+		keyboardSwitch.setOnClickListener(this);
 
 		gestureView.addOnGestureListener(new GestureProcessor());
 
 		supportSymbolKeyboardView.setOnKeyboardActionListener(new SymbolProcessor());
 		supportSymbolKeyboardView.setKeyboard(new Keyboard(service, R.xml.symbols));
 
-		currentType = Classificator.ALPHA;
+		//currentType = Classificator.ALPHA;
 		typeSwitch.setText(R.string.alphaOn);
 		recentLabel.setText("");
 	}
@@ -121,15 +118,15 @@ public class GestureInputMethod extends InputMethodController implements
 			String text = service.getCurrentInputConnection().getExtractedText(new ExtractedTextRequest(), 0).text.toString();
 			int n = 1;
 			if (text.length() > 0) {
-				if (wordSeparators.contains(Character.toString(text.charAt(text.length() - 1)))) {
+				if (word_separators.contains(Character.toString(text.charAt(text.length() - 1)))) {
 					while (n < text.length()
-							&& wordSeparators.contains(Character.toString(text.charAt(text.length()
+							&& word_separators.contains(Character.toString(text.charAt(text.length()
 									- n - 1))))
 						n++;
 				}
 				else {
 					while (n < text.length()
-							&& !wordSeparators.contains(Character.toString(text.charAt(text.length()
+							&& !word_separators.contains(Character.toString(text.charAt(text.length()
 									- n - 1))))
 						n++;
 				}
@@ -143,27 +140,24 @@ public class GestureInputMethod extends InputMethodController implements
 
 	public void onClick(View v) {
 		if (v.getId() == R.id.typeSwitch) {
-			if (currentType == Classificator.ALPHA) {
-				currentType = Classificator.NUMBER;
-				typeSwitch.setText(R.string.numOn);
-				Log.v(TAG, "Type - num");
-			}
-			else if (currentType == Classificator.NUMBER) {
-				currentType = Classificator.ALPHA_AND_NUMBER;
-				typeSwitch.setText(R.string.autoOn);
-				Log.v(TAG, "Type - auto");
-			}
-			else {
-				currentType = Classificator.ALPHA;
-				typeSwitch.setText(R.string.alphaOn);
-				Log.v(TAG, "Type - alpha");
-			}
+//			if (currentType == Classificator.SMALL_ALPHA) {
+//				currentType = Classificator.NUMBER;
+//				typeSwitch.setText(R.string.numOn);
+//				Log.v(TAG, "Type - num");
+//			}
+//			else if (currentType == Classificator.NUMBER) {
+//				currentType = Classificator.ALPHA_AND_NUMBER;
+//				typeSwitch.setText(R.string.autoOn);
+//				Log.v(TAG, "Type - auto");
+//			}
+//			else {
+//				currentType = Classificator.ALPHA;
+//				typeSwitch.setText(R.string.alphaOn);
+//				Log.v(TAG, "Type - alpha");
+//			}
 		}
 		if (v.getId() == R.id.deleteKey) {
 			Log.d(TAG, "delete key");
-			// service.1getCurrentInputConnection().deleteSurroundingText(1, 0);
-			// recentLabel.setText("");
-			// service.refreshSuggestions();
 			service.delete();
 		}
 		if (v.getId() == R.id.enterKey) {
@@ -174,52 +168,15 @@ public class GestureInputMethod extends InputMethodController implements
 		}
 		if (v.getId() == R.id.spaceKey) {
 			Log.d(TAG, "space key");
-			service.enterCharacter(' ');
+			service.enterCharacter('\u0020');
 		}
 		if (v.getId() == R.id.symbolSwitch) {
 			showSymbols(symbolSwitch.isChecked());
 		}
 		if (v.getId() == R.id.keyboardToggle) {
 			Log.i(TAG, "Input switch requested");
+			service.switchInputMethod();
 		}
-	}
-
-	private Character processCharacter(Character c) {
-		if (altKey.isChecked()) {
-			switch (c) {
-			case 'a':
-				c = 'ą';
-				break;
-			case 'c':
-				c = 'ć';
-				break;
-			case 'e':
-				c = 'ę';
-				break;
-			case 'l':
-				c = 'ł';
-				break;
-			case 'n':
-				c = 'ń';
-				break;
-			case 'o':
-				c = 'ó';
-				break;
-			case 's':
-				c = 'ś';
-				break;
-			case 'x':
-				c = 'ź';
-				break;
-			case 'z':
-				c = 'ż';
-				break;
-			}
-		}
-		if (shiftKey.isChecked()) {
-			c = Character.toUpperCase(c);
-		}
-		return c;
 	}
 
 	public void resetModifiers() {
@@ -290,12 +247,14 @@ public class GestureInputMethod extends InputMethodController implements
 		}
 
 		private class RecognitionTask extends
-				AsyncTask<Gesture, Void, Pair<Character, Float>> {
+				AsyncTask<Gesture, Void, Label> {
 
 			@Override
-			protected Pair<Character, Float> doInBackground(Gesture... gestures) {
-				Pair<Character, Float> r = classHandler.classify(gestures[0], currentType);
-				return r;
+			protected Label doInBackground(Gesture... gestures) {
+				ClassificationResult r = classHandler.classify(gestures[0], Classificator.SMALL_ALPHA | Classificator.CAPITAL_ALPHA | Classificator.NUMBER);
+				if (r == null) return null;
+				Label[] labels = r.getLabelsWithBelief();				
+				return	labels[0];
 			}
 
 			/*
@@ -304,10 +263,10 @@ public class GestureInputMethod extends InputMethodController implements
 			 * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
 			 */
 			@Override
-			protected void onPostExecute(Pair<Character, Float> result) {
+			protected void onPostExecute(Label result) {
 				super.onPostExecute(result);
 				synchronized (this) {
-					if (result != null) current_result = result.first;
+					if (result != null) current_result = result.label;
 				}
 			}
 		}
@@ -355,7 +314,8 @@ public class GestureInputMethod extends InputMethodController implements
 
 	private class SymbolProcessor implements OnKeyboardActionListener {
 		public void onKey(int primaryCode, int[] keyCodes) {
-			service.getCurrentInputConnection().commitText(Character.toString((char) primaryCode), 1);
+			//service.getCurrentInputConnection().commitText(Character.toString((char) primaryCode), 1);
+			service.enterCharacter((char) primaryCode);
 			showSymbols(false);
 			recentLabel.setText(Character.toString((char) primaryCode));
 		}

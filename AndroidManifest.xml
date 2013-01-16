@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="pl.scribedroid" >
 
-    <uses-sdk android:minSdkVersion="8" />
-
+    <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="10"/>
+	
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.READ_USER_DICTIONARY" />
@@ -40,6 +40,7 @@
         <service
             android:name=".training.TrainingService"
             android:exported="false" />
+        <service android:name=".input.dictionary.DictionaryService" />
     </application>
 
 </manifest>
