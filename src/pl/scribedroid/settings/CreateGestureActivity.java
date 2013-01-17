@@ -60,7 +60,6 @@ public class CreateGestureActivity extends Activity {
         }
     }
 
-    @SuppressWarnings({"UnusedDeclaration"})
     public void addGesture(View v) {
         if (mGesture != null) {
             final TextView input = (TextView) findViewById(R.id.gesture_name);
@@ -87,7 +86,6 @@ public class CreateGestureActivity extends Activity {
         
     }
     
-    @SuppressWarnings({"UnusedDeclaration"})
     public void cancelGesture(View v) {
         setResult(RESULT_CANCELED);
         finish();

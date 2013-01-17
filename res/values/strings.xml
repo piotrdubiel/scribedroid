@@ -17,7 +17,7 @@
 ** limitations under the License.
 */
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2" xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Title for Latin keyboard -->
     <string name="ime_name">ScribeDroid Input</string>
@@ -50,6 +50,14 @@
     </string-array>
 
     <string name="special">!@#</string>
+    
+    <string-array name="input_modes">
+        <item name="all_mode">Auto</item>
+        <item name="letters_mode">Abc</item>
+        <item name="capital_mode">ABC</item>
+        <item name="small_mode">abc</item>
+        <item name="digit_mode">123</item>
+    </string-array>
 
     <string-array name="gestureInterval">
         <item name="100">100 ms</item>

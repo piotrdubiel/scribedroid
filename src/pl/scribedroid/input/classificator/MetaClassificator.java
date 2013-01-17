@@ -37,10 +37,7 @@ public class MetaClassificator implements Classificator {
 			pl_small_net = NetworkImpl.createFromInputStream(context.getAssets().open("pl_small_net"), Classificator.SMALL_ALPHA);
 			pl_capital_net = NetworkImpl.createFromInputStream(context.getAssets().open("pl_capital_net"), Classificator.CAPITAL_ALPHA);
 			digit_net = NetworkImpl.createFromInputStream(context.getAssets().open("digit_net"), Classificator.NUMBER);
-			lod_net = NetworkImpl.createFromInputStream(context.getAssets().open("lod_net"), Classificator.GROUP
-					| Classificator.CAPITAL_ALPHA
-					| Classificator.SMALL_ALPHA
-					| Classificator.NUMBER);
+			lod_net = NetworkImpl.createFromInputStream(context.getAssets().open("lod_net"), Classificator.GROUP | Classificator.CAPITAL_ALPHA | Classificator.SMALL_ALPHA | Classificator.NUMBER);
 			cos_net = NetworkImpl.createFromInputStream(context.getAssets().open("cos_net"), Classificator.GROUP);
 
 			alpha_library = new GestureLibraryClassificator(c, GestureLibraryClassificator.USER_ALPHA_FILENAME);
@@ -64,41 +61,69 @@ public class MetaClassificator implements Classificator {
 	@Override
 	public ClassificationResult classify(Gesture gesture, int type) {
 		float[] sample = prepare(gesture);
+		if (sample == null) return null;
 		ClassificationResult result = null;
-		Log.i(TAG, "First type: " + type + " "
-				+ (Classificator.SMALL_ALPHA | Classificator.CAPITAL_ALPHA | Classificator.NUMBER));
+		Log.i(TAG, "First type: " + type + " " +  (Classificator.SMALL_ALPHA | Classificator.CAPITAL_ALPHA));
 		if (type == (Classificator.SMALL_ALPHA | Classificator.CAPITAL_ALPHA | Classificator.NUMBER)) {
-			try {
-				ClassificationResult pl_small = pl_small_net.classify(sample);
-				for (Label l : pl_small.result)
-					Log.i(TAG, "Small: " + l.label + " " + l.belief);
-				ClassificationResult pl_capital = pl_capital_net.classify(sample);
-				for (Label l : pl_capital.result)
-					Log.i(TAG, "Capital: " + l.label + " " + l.belief);
-				ClassificationResult digit = digit_net.classify(sample);
-				for (Label l : digit.result)
-					Log.i(TAG, "Digit: " + l.label + " " + l.belief);
-				ClassificationResult lod = lod_net.classify(sample);
-				for (Label l : lod.result)
-					Log.i(TAG, "LOD: " + l.label + " " + l.belief);
-				ClassificationResult cos = cos_net.classify(sample);
-				for (Label l : cos.result)
-					Log.i(TAG, "COS: " + l.label + " " + l.belief);
-				ClassificationResult alpha_lib = alpha_library.classify(gesture,Classificator.CAPITAL_ALPHA);
-				for (Label l : alpha_lib.result)
-					Log.i(TAG, "ALPHA lib: " + l.label + " " + l.belief);				
-				ClassificationResult number_lib = number_library.classify(gesture,Classificator.NUMBER);
-				for (Label l : number_lib.result)
-					Log.i(TAG, "NUMBER lib: " + l.label + " " + l.belief);
+			ClassificationResult pl_small = pl_small_net.classify(sample);
+			// for (Label l : pl_small.result)
+			// Log.i(TAG, "Small: " + l.label + " " + l.belief);
+			ClassificationResult pl_capital = pl_capital_net.classify(sample);
+			// for (Label l : pl_capital.result)
+			// Log.i(TAG, "Capital: " + l.label + " " + l.belief);
+			ClassificationResult digit = digit_net.classify(sample);
+			// for (Label l : digit.result)
+			// Log.i(TAG, "Digit: " + l.label + " " + l.belief);
+			ClassificationResult lod = lod_net.classify(sample);
+			// for (Label l : lod.result)
+			// Log.i(TAG, "LOD: " + l.label + " " + l.belief);
+			ClassificationResult cos = cos_net.classify(sample);
+			// for (Label l : cos.result)
+			// Log.i(TAG, "COS: " + l.label + " " + l.belief);
+			ClassificationResult alpha_lib = alpha_library.classify(gesture, Classificator.CAPITAL_ALPHA);
+			// for (Label l : alpha_lib.result)
+			// Log.i(TAG, "ALPHA lib: " + l.label + " " + l.belief);
+			ClassificationResult number_lib = number_library.classify(gesture, Classificator.NUMBER);
+			// for (Label l : number_lib.result)
+			// Log.i(TAG, "NUMBER lib: " + l.label + " " + l.belief);
 
-				// result = result.combine(cos_net.classify(sample));
+			result = lod.combine(cos);
+			result = result.combine(pl_small);
+			result = result.combine(pl_capital);
+			result = result.combine(digit);
+			result = result.combine(alpha_lib);
+			result = result.combine(number_lib);
 
-				result = pl_capital;
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
 		}
+		else if (type == (Classificator.SMALL_ALPHA | Classificator.CAPITAL_ALPHA)) {
+			ClassificationResult pl_small = pl_small_net.classify(sample);
+			ClassificationResult pl_capital = pl_capital_net.classify(sample);
+			ClassificationResult cos = cos_net.classify(sample);
+			ClassificationResult alpha_lib = alpha_library.classify(gesture, Classificator.CAPITAL_ALPHA);
+			
+			result = cos.combine(pl_small).combine(pl_capital).combine(alpha_lib);
+		}
+		else if (type == Classificator.SMALL_ALPHA ) {
+			ClassificationResult pl_small = pl_small_net.classify(sample);
+			ClassificationResult alpha_lib = alpha_library.classify(gesture, Classificator.CAPITAL_ALPHA);
+			
+			result = pl_small.combine(alpha_lib);
+		}
+		else if (type ==  Classificator.CAPITAL_ALPHA) {
+			ClassificationResult pl_capital = pl_capital_net.classify(sample);
+			ClassificationResult alpha_lib = alpha_library.classify(gesture, Classificator.CAPITAL_ALPHA);
+			
+			result = pl_capital.combine(alpha_lib);
+		}
+		else if (type == Classificator.NUMBER) {
+			ClassificationResult digit = digit_net.classify(sample);
+			ClassificationResult number_lib = number_library.classify(gesture, Classificator.NUMBER);
+			
+			result = digit.combine(number_lib);
+		}
+
+		for (Label l : result.result)
+			Log.i(TAG, "RESULT: " + l.label + " " + l.belief);
 
 		return result;
 	}

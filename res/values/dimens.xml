@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="gesture_thumbnail_inset">8dip</dimen>
-    <dimen name="gesture_thumbnail_size">64dip</dimen>
-    <dimen name="gesture_sample_size">28dip</dimen>
-    <dimen name="key_height">40dip</dimen>
-    <dimen name="standard_key_height">50dip</dimen>
+    <dimen name="gesture_thumbnail_inset">8dp</dimen>
+    <dimen name="gesture_thumbnail_size">64dp</dimen>
+    <dimen name="gesture_sample_size">28dp</dimen>
+    <dimen name="key_height">40dp</dimen>
+    <dimen name="standard_key_height">50dp</dimen>
     <dimen name="candidate_font_height">25sp</dimen>
     <dimen name="candidate_vertical_padding">10sp</dimen>
 </resources>

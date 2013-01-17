@@ -33,7 +33,7 @@ int Java_pl_scribedroid_input_dictionary_NativeDictionary_createDictionary(
 	int rc;
 	char* error_message;
 	char* sql_text = new char[100];
-	sprintf(sql_text, "select word from words where frequency>%d;", (int) freq_limit);
+	sprintf(sql_text, "select word from words where frequency>%d order by frequency desc;", (int) freq_limit);
 	LOGI(sql_text);
 	int sql_length = strlen(sql_text) + 1;
 	sqlite3_stmt* sql_statement;

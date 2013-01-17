@@ -22,9 +22,9 @@ public class Utils {
 
 	private static final int VECTOR_LENGTH = 784;
 	public static final int RESULT_COUNT = 4;
-	public static final char[] LETTERS = { 'a', 'ą', 'b', 'c', 'ć', 'd', 'e', 'ę', 'f', 'g', 'h',
-			'j', 'k', 'l', 'ł', 'm', 'n', 'ń', 'o', 'ó', 'p', 'q', 'r', 's', 'ś', 't', 'u', 'v',
-			'w', 'x', 'y', 'z', 'ź', 'ż' };
+	public static final char[] LETTERS = { 'a', '\u0105', 'b', 'c', '\u0107', 'd', 'e', '\u0119', 'f', 'g', 'h',
+			'i', 'j', 'k', 'l', '\u0142', 'm', 'n', '\u0144', 'o', '\u00F3', 'p', 'q', 'r', 's', '\u015B', 't', 'u',
+			'v', 'w', 'x', 'y', 'z', '\u017A', '\u017C' };
 
 	public static List<Gesture> getAllPossibleGestures(Gesture g) {
 		List<Gesture> gestures = new ArrayList<Gesture>();
@@ -99,10 +99,7 @@ public class Utils {
 					int c = in.getPixel(i, j);
 					float gray = toGray(c);
 					if (gray < threshold) {
-						if (toGray(in.getPixel(i - 1, j)) >= threshold
-								|| toGray(in.getPixel(i, j - 1)) >= threshold
-								|| toGray(in.getPixel(i + 1, j)) >= threshold
-								|| toGray(in.getPixel(i, j + 1)) >= threshold) {
+						if (toGray(in.getPixel(i - 1, j)) >= threshold || toGray(in.getPixel(i, j - 1)) >= threshold || toGray(in.getPixel(i + 1, j)) >= threshold || toGray(in.getPixel(i, j + 1)) >= threshold) {
 							out.setPixel(i, j, Color.WHITE);
 						}
 						else {

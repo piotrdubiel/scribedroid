@@ -1,9 +1,13 @@
 package pl.scribedroid.input;
 
+import java.util.Arrays;
+import java.util.List;
+
 import pl.scribedroid.R;
 import pl.scribedroid.input.keyboard.StandardKeyboard;
 import roboguice.inject.InjectResource;
 import android.inputmethodservice.Keyboard;
+import android.inputmethodservice.Keyboard.Key;
 import android.inputmethodservice.KeyboardView;
 import android.util.Log;
 import android.widget.Toast;
@@ -15,17 +19,21 @@ public class KeyboardInputMethod extends InputMethodController implements
 
 	Keyboard alpha_keyboard;
 	Keyboard symbols_keyboard;
-	Keyboard symbols_shift_keyboard;	
+	Keyboard symbols_shift_keyboard;
 
-	private static final int NORMAL 	= 0;
-	private static final int SHIFTED 	= 1;
-	private static final int CAPSLOCK 	= 2;
-	
+	private static final int NORMAL = 0;
+	private static final int SHIFTED = 1;
+	private static final int CAPSLOCK = 2;
+
 	private int shift_state = NORMAL;
+
+	private int last_keycode = 0;
+	private int current_keycode = 0;
+	
+	private boolean postponed_reset = false;
 
 	@InjectResource(R.string.word_separators)
 	String word_separators;
-	
 
 	public KeyboardInputMethod(ScribeDroid s) {
 		super(s, R.layout.standard_keyboard);
@@ -41,12 +49,28 @@ public class KeyboardInputMethod extends InputMethodController implements
 
 	@Override
 	public void resetModifiers() {
-		// TODO Auto-generated method stub
-
+		Log.d(TAG, "Last keycode: " + last_keycode + " Current keycode: " + current_keycode+ " " +isCodeComplex(current_keycode));
+		if (shift_state == SHIFTED) {
+//			if (isCodeComplex(current_keycode)) {
+//				postponed_reset = true;
+//				return;
+//			}
+			
+//			if (postponed_reset && current_keycode == Keyboard.KEYCODE_DELETE) {}
+//			
+				shift_state = NORMAL;
+				((KeyboardView) inputView).setShifted(false);
+//			}
+//			else if (!postponed_reset)
+		}
 	}
 
 	@Override
-	public void onKey(int primaryCode, int[] keyCodes) {		
+	public void onKey(int primaryCode, int[] keyCodes) {
+		Log.v(TAG, "OnKey: " + primaryCode + " " + (char) primaryCode);
+		last_keycode = current_keycode;
+		current_keycode = primaryCode;
+		Log.d(TAG, "Last keycode: " + last_keycode + " Current keycode: " + current_keycode);
 		if (primaryCode == Keyboard.KEYCODE_DELETE) {
 			service.delete();
 		}
@@ -69,9 +93,11 @@ public class KeyboardInputMethod extends InputMethodController implements
 			}
 		}
 		else {
-			Log.v(TAG, "OnKey: " + primaryCode+ " " + (char) primaryCode);
-			service.enterCharacter((char) primaryCode);
-			// handleCharacter(primaryCode, keyCodes);
+			Log.v(TAG, "OnKey: " + primaryCode + " " + (char) primaryCode);
+			if (shift_state == SHIFTED || shift_state == CAPSLOCK) service.enterCharacter(Character.toUpperCase((char) primaryCode));
+			else service.enterCharacter((char) primaryCode);
+
+			resetModifiers();
 		}
 	}
 
@@ -105,23 +131,23 @@ public class KeyboardInputMethod extends InputMethodController implements
 			symbols_keyboard.setShifted(false);
 		}
 	}
-	
+
 	@Override
 	public void onPress(int primaryCode) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	public void onRelease(int primaryCode) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	public void onText(CharSequence text) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -141,7 +167,29 @@ public class KeyboardInputMethod extends InputMethodController implements
 
 	@Override
 	public void swipeUp() {
+		//handleShift();
 		Log.d(TAG, "Up");
 	}
 
+	boolean isCodeComplex(int keycode) {
+		Keyboard current_keyboard = ((KeyboardView) inputView).getKeyboard();
+		List<Key> keys = current_keyboard.getKeys();
+
+		for (Key k : keys) {
+			if (Arrays.binarySearch(k.codes, keycode) >= 0 && k.codes.length > 1) return true;
+		}
+
+		return false;
+	}
+	
+	boolean isCodeInOneKey(int keycode_a, int keycode_b) {
+		Keyboard current_keyboard = ((KeyboardView) inputView).getKeyboard();
+		List<Key> keys = current_keyboard.getKeys();
+
+		for (Key k : keys) {
+			if (Arrays.binarySearch(k.codes, keycode_a) >= 0 &&Arrays.binarySearch(k.codes, keycode_b) >= 0) return true;
+		}
+
+		return false;
+	}
 }

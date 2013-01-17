@@ -29,7 +29,16 @@ public class DatabaseDictionary extends Dictionary {
 		super(c);
 		maxSuggestions = limit;
 		dbHelper = new DictionaryDbHelper(c);
+		try {
 		database = dbHelper.getWritableDatabase();
+		Cursor cursor = database.rawQuery("select count(*) from words", null);
+		cursor.moveToFirst();
+		Log.d(TAG, "Words in database: " + cursor.getInt(0));
+		cursor.close();
+		}
+		catch (Exception e) {
+			Log.e(TAG, e.getMessage());
+		}
 	}
 
 	@Override

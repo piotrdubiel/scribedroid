@@ -1,7 +1,9 @@
 package pl.scribedroid.input.dictionary;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
+import pl.scribedroid.input.Utils;
 import pl.scribedroid.input.classificator.ClassificationResult.Label;
 import android.content.ContentValues;
 import android.content.Context;
@@ -60,7 +62,8 @@ public class TrigramDatabase {
 		if (cursor.getCount() > 0) {
 			for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
 				float p = ((float) cursor.getInt(cursor.getColumnIndex(TrigramDbHelper.COLUMN_FREQUENCY))) / denom;
-				result.add(new Label(cursor.getString(cursor.getColumnIndex(TrigramDbHelper.COLUMN_GRAM)).charAt(2), p));
+				char c = cursor.getString(cursor.getColumnIndex(TrigramDbHelper.COLUMN_GRAM)).charAt(2);
+				if (Arrays.binarySearch(Utils.LETTERS, c) >= 0) result.add(new Label(c, p));
 			}
 		}
 		cursor.close();
@@ -72,7 +75,8 @@ public class TrigramDatabase {
 	}
 
 	private int computeNormalizer() {
-		Cursor cursor = database.rawQuery("SELECT SUM(" + TrigramDbHelper.COLUMN_FREQUENCY + ") FROM" + TrigramDbHelper.TABLE_GRAMS, null);
+		Cursor cursor = database.rawQuery("SELECT SUM(" + TrigramDbHelper.COLUMN_FREQUENCY + ") FROM " + TrigramDbHelper.TABLE_GRAMS, null);
+		cursor.moveToFirst();
 		if (cursor.getCount() == 1) return cursor.getInt(0);
 		return 0;
 	}
