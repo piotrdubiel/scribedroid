@@ -6,7 +6,6 @@ import java.util.List;
 import pl.scribedroid.R;
 import pl.scribedroid.input.classificator.ClassificationResult;
 import pl.scribedroid.input.classificator.ClassificationResult.Label;
-import pl.scribedroid.input.classificator.Classificator;
 import pl.scribedroid.input.dictionary.SuggestionManager;
 import pl.scribedroid.input.dictionary.TrigramDatabase;
 import roboguice.RoboGuice;
@@ -32,7 +31,8 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 	private GestureInputMethod gestureInputMethod;
 	private InputMethodController keyboardInputMethod;
 
-	private boolean completionOn;
+	private boolean completion_on;
+	private boolean completion_settings;
 	private boolean vibrateOn;
 	private boolean trigramsOn;
 	
@@ -52,23 +52,18 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 	public void onCreate() {
 		super.onCreate();
 		RoboGuice.getBaseApplicationInjector(getApplication()).injectMembers(this);
-	}
-
-	@Override
-	public void onInitializeInterface() {
 		PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
-
+		loadPreferences();		
+		trigram_database = new TrigramDatabase(this);
+	}
+	
+	@Override
+	public View onCreateInputView() {
+		
 		gestureInputMethod = new GestureInputMethod(this);
 		keyboardInputMethod = new KeyboardInputMethod(this);
 		currentInputMethod = gestureInputMethod;
-
-		loadPreferences();
 		
-		trigram_database = new TrigramDatabase(this);
-	}
-
-	@Override
-	public View onCreateInputView() {
 		return currentInputMethod.inputView;
 	}
 
@@ -76,26 +71,27 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 	public void onStartInput(EditorInfo info, boolean restarting) {
 		super.onStartInput(info, restarting);
 
+		completion_on = true;
 		switch (info.inputType & EditorInfo.TYPE_MASK_CLASS) {
 		case EditorInfo.TYPE_CLASS_TEXT:
 			int variation = info.inputType & EditorInfo.TYPE_MASK_VARIATION;
 			if (variation == EditorInfo.TYPE_TEXT_VARIATION_PASSWORD || variation == EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD) {
-				completionOn = false;
+				completion_on = false;
 			}
 
 			if (variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS || variation == EditorInfo.TYPE_TEXT_VARIATION_URI || variation == EditorInfo.TYPE_TEXT_VARIATION_FILTER) {
-				completionOn = false;
+				completion_on = false;
 			}
 
 			if ((info.inputType & EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE) != 0) {
-				completionOn = false;
-			}
+				completion_on = false;
+			}			
 			break;
 		}
 		composing_text.setLength(0);
 		refreshSuggestions();
 
-		Log.d(TAG, "Completion: " + String.valueOf(completionOn));
+		Log.d(TAG, "Completion: " + String.valueOf(completion_settings && completion_on));
 	}
 
 	/*
@@ -160,7 +156,7 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 		InputConnection ic = getCurrentInputConnection();
 		if (composing_text.length() > 0) {
 			ic.commitText(composing_text, composing_text.length());
-			if (suggest != null & suggest.isReady()) {
+			if (suggest != null && suggest.isReady()) {
 				Log.i(TAG, "Word " + composing_text + " is valid: " + suggest.isValid(composing_text.toString()));
 				if (suggest.isValid(composing_text.toString())) suggest.addToDictionary(composing_text.toString());
 			}
@@ -257,7 +253,7 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 	}
 
 	void pickSuggestion(String word) {
-		if (completionOn) {
+		if (completion_settings && completion_on) {
 			getCurrentInputConnection().commitText(word, word.length());
 			if (!suggest.isValid(word)) {
 				suggest.addToUserDictionary(word);
@@ -268,8 +264,8 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 	}
 
 	void refreshSuggestions() {
-		Log.i(TAG, "REFRESH Suggestions");
-		if (completionOn && suggest != null && suggest.isReady()) {
+		Log.i(TAG, "REFRESH Suggestions " + String.valueOf(suggest != null ? suggest.isReady() : false));
+		if (completion_settings && completion_on && suggest != null && suggest.isReady()) {
 			// if (getCurrentInputConnection().getExtractedText(
 			// new ExtractedTextRequest(), 0) == null) return;
 			// String text = getCurrentInputConnection().getExtractedText(
@@ -319,14 +315,10 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 	private void loadPreferences() {
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-		gestureInputMethod.gestureInterval = Integer.parseInt(sharedPrefs.getString("gesture_interval", "300"));
-		gestureInputMethod.gestureView.setFadeOffset(gestureInputMethod.gestureInterval);
-		Log.d(TAG, "Interval preference: " + String.valueOf(gestureInputMethod.gestureInterval));
+		completion_settings = sharedPrefs.getBoolean("use_dictionary", true);
+		Log.d(TAG, "Completion: " + String.valueOf(completion_settings));
 
-		completionOn = sharedPrefs.getBoolean("use_dictionary", true);
-		Log.d(TAG, "Completion: " + String.valueOf(completionOn));
-
-		if (completionOn) {
+		if (completion_settings) {
 			suggest = new SuggestionManager(this);
 		}
 		else {
@@ -337,11 +329,6 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 		trigramsOn = sharedPrefs.getBoolean("use_trigrams", true);
 		Log.d(TAG, "Vibration: " + String.valueOf(vibrateOn));
 		Log.d(TAG, "Trigrams: " + String.valueOf(trigramsOn));
-	}
-
-	private StringBuilder getComposingTextFromResults() {
-
-		return null;
 	}
 
 	void vibrate() {

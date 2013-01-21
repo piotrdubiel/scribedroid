@@ -38,14 +38,14 @@ public class NetworkImpl implements Network {
 	}
 
 	@Override
-	public ClassificationResult classify(float[] in) {
-		float[] y = answer(in);
+	public ClassificationResult classify(float[] sample) {
+		float[] y = classifyRaw(sample);
 		if ((type & Classificator.GROUP) == 0) {
 			return new ClassificationResult(y, type);
 		}
 		else {
 			ArrayList<Label> result = new ArrayList<Label>();
-			if ((type & Classificator.NUMBER) == 0 
+			if ((type & Classificator.DIGIT) == 0 
 					&& (type & Classificator.SMALL_ALPHA) > 0
 					&& (type & Classificator.CAPITAL_ALPHA) > 0) {
 				// COS net
@@ -55,7 +55,7 @@ public class NetworkImpl implements Network {
 					result.add(new Label(Character.toUpperCase(c), y[0]));
 
 			}
-			if ((type & Classificator.NUMBER) > 0 
+			if ((type & Classificator.DIGIT) > 0 
 					&& (type & Classificator.SMALL_ALPHA) > 0
 					&& (type & Classificator.CAPITAL_ALPHA) > 0) {
 				// LOD net
@@ -65,21 +65,23 @@ public class NetworkImpl implements Network {
 					result.add(new Label(Character.toUpperCase(c), y[1]));
 				
 				for (char c = '0'; c < '9'; ++c)
-					result.add(new Label(Character.toUpperCase(c), y[0]));
+					result.add(new Label(c, y[0]));
 
 			}
 			return new ClassificationResult(result, type);
 		}
 	}
 
-	private float[] answer(float[] in) {
-		float[] result = in;
+	
+	@Override
+	public float[] classifyRaw(float[] sample) {
+		float[] result = sample;
 		for (LayerImpl l : layers) {
 			result = l.answer(result);
 		}
 		return result;
 	}
-
+	
 	@Override
 	public List<List<Vector>> train(float[] in, int label) throws Exception {
 		List<Vector> y = new ArrayList<Vector>();

@@ -11,8 +11,9 @@ import android.gesture.GestureLibrary;
 import android.gesture.Prediction;
 
 public class GestureLibraryClassificator implements Classificator {
-	public static final String USER_ALPHA_FILENAME = "user_alpha_lib";
-	public static final String USER_NUMBER_FILENAME = "user_number_lib";
+	public static final String USER_SMALL_FILENAME = "user_small_lib";
+	public static final String USER_CAPITAL_FILENAME = "user_capital_lib";
+	public static final String USER_DIGIT_FILENAME = "user_digit_lib";
 
 	private GestureLibrary library;
 
@@ -48,18 +49,13 @@ public class GestureLibraryClassificator implements Classificator {
 
 	public boolean isValid() {
 		if (library != null) {
-			if (library.load() && library.getGestureEntries().size() > 0) {
-				if (library.getGestureEntries().contains("a")
-						&& library.getGestureEntries().size() == 26) {
-					return true;
-				}
-				else if (library.getGestureEntries().contains("0")
-						&& library.getGestureEntries().size() == 10) {
-					return true;
-				}
-				return false;
-			}
+			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public float[] classifyRaw(float[] sample) {
+		return null;
 	}
 }

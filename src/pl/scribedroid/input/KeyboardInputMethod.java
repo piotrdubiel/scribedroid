@@ -30,6 +30,8 @@ public class KeyboardInputMethod extends InputMethodController implements
 	private int last_keycode = 0;
 	private int current_keycode = 0;
 	
+	// TODO
+	@SuppressWarnings("unused")
 	private boolean postponed_reset = false;
 
 	@InjectResource(R.string.word_separators)
@@ -134,20 +136,14 @@ public class KeyboardInputMethod extends InputMethodController implements
 
 	@Override
 	public void onPress(int primaryCode) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void onRelease(int primaryCode) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void onText(CharSequence text) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

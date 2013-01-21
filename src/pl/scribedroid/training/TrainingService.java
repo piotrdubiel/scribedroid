@@ -1,21 +1,9 @@
 package pl.scribedroid.training;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Arrays;
-
-import pl.scribedroid.input.Utils;
-import pl.scribedroid.input.ann.Network;
-import pl.scribedroid.input.ann.NetworkImpl;
-import pl.scribedroid.input.classificator.Classificator;
 import android.app.IntentService;
 import android.content.Intent;
-import android.gesture.Gesture;
-import android.gesture.GestureUtils;
-import android.os.AsyncTask;
 import android.util.Log;
-import android.util.Pair;
-import android.widget.Toast;
+import pl.scribedroid.input.ann.Network;
 
 public class TrainingService extends IntentService {
 	private Network network;

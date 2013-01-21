@@ -23,4 +23,4 @@
     <string name="label_send_key">Send</string>
     <string name="dict_notification_title_text">Creating dictionary from file</string>
 	<string name="use_trigrams_title">Use trigrams</string>
-	<string name="use_trigrams_desc">Enhance recognition by using trigrams database</string></resources>
+	<string name="use_trigrams_desc">Enhance recognition using trigrams database</string></resources>

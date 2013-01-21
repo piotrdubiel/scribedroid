@@ -2,6 +2,7 @@ package pl.scribedroid.input.classificator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
 
 import junit.framework.Assert;
 
@@ -24,7 +25,7 @@ public class ClassificationResultTest {
 	public void testFlags() {
 		Assert.assertEquals(1, Classificator.SMALL_ALPHA);
 		Assert.assertEquals(2, Classificator.CAPITAL_ALPHA);
-		Assert.assertEquals(4, Classificator.NUMBER);
+		Assert.assertEquals(4, Classificator.DIGIT);
 		Assert.assertEquals(3, Classificator.SMALL_ALPHA | Classificator.CAPITAL_ALPHA);
 	}
 
@@ -86,7 +87,7 @@ public class ClassificationResultTest {
 		float[] in = { 0.001f, 0.01f, 0.02f, 0.03f, 0.04f, 0.05f, 0.06f, 0.07f, 0.08f, 0.09f };
 
 		// when
-		ClassificationResult cr = new ClassificationResult(in, Classificator.NUMBER);
+		ClassificationResult cr = new ClassificationResult(in, Classificator.DIGIT);
 		Character[] labels = cr.getLabels();
 
 		// then
@@ -109,7 +110,7 @@ public class ClassificationResultTest {
 		float[] in = { 0.001f, 0.01f, 0.02f, 0.03f, 0.04f, 0.05f, 0.06f, 0.07f, 0.08f, 0.09f };
 
 		// when
-		ClassificationResult cr = new ClassificationResult(in, Classificator.NUMBER);
+		ClassificationResult cr = new ClassificationResult(in, Classificator.DIGIT);
 		Label[] labels = cr.getLabelsWithBelief();
 
 		// then
@@ -151,15 +152,11 @@ public class ClassificationResultTest {
 		float[] b = { 1.0f, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f };
 
 		// when
-		ClassificationResult A = new ClassificationResult(a, Classificator.NUMBER);
-		ClassificationResult B = new ClassificationResult(b, Classificator.NUMBER);
+		ClassificationResult A = new ClassificationResult(a, Classificator.DIGIT);
+		ClassificationResult B = new ClassificationResult(b, Classificator.DIGIT);
 
 		ClassificationResult AB = A.combine(B);
 		ClassificationResult BA = B.combine(A);
-		
-		for (Label l : BA.result) {
-			System.out.println(l.label + " " + l.belief);
-		}
 		
 		// then
 		Assert.assertEquals('0', AB.result.get(0).label, EPS);
@@ -223,5 +220,29 @@ public class ClassificationResultTest {
 			//Assert.assertEquals(0.0f, l.belief, EPS);
 		}
 		Assert.assertEquals(B.result.size(), AB.result.size());
+	}
+	
+	@Test
+	public void testPairsWith() {
+		// given
+		float[] a = { 0.0f, 0.3f, 0.0f, 0.0f, 0.04f, 0.05f, 0.06f, 0.07f, 0.08f, 0.09f };
+		float[] b = { 0.0f, 0.1f, 0.0f, 0.5f, 0.7f, 0.3f, 0.6f, 0.7f, 0.8f, 0.9f };
+		
+		// when
+		ClassificationResult A = new ClassificationResult(a, Classificator.DIGIT);
+		ClassificationResult B = new ClassificationResult(b, Classificator.DIGIT);
+		
+		// then
+		ClassificationResult pairs = A.pairsWith(B);
+		
+		Assert.assertEquals(4, pairs.result.size());
+		
+		Map<Character, Float> pairs_map = pairs.getLabelsAsMap();
+		
+		Assert.assertEquals(0.081f, pairs_map.get('9'), EPS);
+		Assert.assertEquals(0.064f, pairs_map.get('8'), EPS);
+		Assert.assertEquals(0.049f, pairs_map.get('7'), EPS);
+		Assert.assertEquals(0.036f, pairs_map.get('6'), EPS);
+		
 	}
 }

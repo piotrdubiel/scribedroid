@@ -36,11 +36,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
-        <service
-            android:name=".training.TrainingService"
-            android:exported="false" />
-        <service android:name=".input.dictionary.DictionaryService" />
     </application>
 
 </manifest>

@@ -2,11 +2,11 @@ package pl.scribedroid.input;
 
 import pl.scribedroid.R;
 import pl.scribedroid.input.classificator.ClassificationResult;
-import pl.scribedroid.input.classificator.ClassificationResult.Label;
 import pl.scribedroid.input.classificator.Classificator;
 import pl.scribedroid.settings.SettingsActivity;
 import roboguice.inject.InjectResource;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.gesture.Gesture;
 import android.gesture.GestureOverlayView;
 import android.gesture.GestureOverlayView.OnGestureListener;
@@ -14,8 +14,8 @@ import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
 import android.inputmethodservice.KeyboardView.OnKeyboardActionListener;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -32,8 +32,6 @@ import com.google.inject.Inject;
 public class GestureInputMethod extends InputMethodController implements OnClickListener,
 		OnLongClickListener {
 	private static final String TAG = "GestureInput";
-	// ToggleButton altKey;
-	// ToggleButton shiftKey;
 	Button typeSwitch;
 	ImageButton deleteKey;
 	ImageButton enterKey;
@@ -55,13 +53,13 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 
 	int current_mode;
 
-	private int[] modes = {
-			(Classificator.CAPITAL_ALPHA | Classificator.SMALL_ALPHA | Classificator.NUMBER),
-			(Classificator.CAPITAL_ALPHA | Classificator.SMALL_ALPHA), Classificator.CAPITAL_ALPHA,
-			Classificator.SMALL_ALPHA, Classificator.NUMBER };
+	private int[] modes = { Classificator.CAPITAL_ALPHA, Classificator.SMALL_ALPHA,
+			Classificator.DIGIT };
 
 	int gestureInterval;
 	boolean capsLock = false;
+
+	private Object recognition_lock = new Object();
 
 	private ClassificationResult current_result;
 
@@ -93,6 +91,8 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 		keyboardSwitch.setOnClickListener(this);
 
 		gestureView.addOnGestureListener(new GestureProcessor());
+		gestureView.setGestureStrokeLengthThreshold(0.0f);
+		gestureView.setGestureStrokeType(GestureOverlayView.GESTURE_STROKE_TYPE_MULTIPLE);
 
 		supportSymbolKeyboardView.setOnKeyboardActionListener(new SymbolProcessor());
 		supportSymbolKeyboardView.setKeyboard(new Keyboard(service, R.xml.symbols));
@@ -100,24 +100,16 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 		// currentType = Classificator.ALPHA;
 		current_mode = 0;
 		typeSwitch.setText(input_modes[0]);
-		recentLabel.setText("");
+
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(service);
+
+		gestureInterval = Integer.parseInt(sharedPrefs.getString("gesture_interval", "300"));
+		gestureView.setFadeOffset(gestureInterval);
+
+		Log.d(TAG, "Interval preference: " + String.valueOf(gestureInterval));
 	}
 
 	public boolean onLongClick(View v) {
-		if (v.getId() == R.id.shiftKey) {
-			if (!capsLock) {
-				// shiftKey.setChecked(true);
-				capsLock = true;
-				service.getCurrentInputConnection().sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_SHIFT_LEFT));
-
-				Toast.makeText(service, "CapsLock", Toast.LENGTH_SHORT).show();
-			}
-			else {
-				// shiftKey.setChecked(false);
-				capsLock = false;
-				service.getCurrentInputConnection().sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_SHIFT_LEFT));
-			}
-		}
 		if (v.getId() == R.id.enterKey) {
 			Intent intent = new Intent(service.getBaseContext(), SettingsActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -145,7 +137,6 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 		if (v.getId() == R.id.enterKey) {
 			Log.d(TAG, "enter key");
 			service.sendDownUpKeyEvents(KeyEvent.KEYCODE_ENTER);
-			recentLabel.setText("");
 			service.refreshSuggestions();
 		}
 		if (v.getId() == R.id.spaceKey) {
@@ -162,12 +153,7 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 	}
 
 	public void resetModifiers() {
-		if (!capsLock) {
-			service.getCurrentInputConnection().sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_SHIFT_LEFT));
-			// shiftKey.setChecked(false);
-		}
-		service.getCurrentInputConnection().sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ALT_LEFT));
-		// altKey.setChecked(false);
+
 	}
 
 	private void showSymbols(boolean visible) {
@@ -187,8 +173,7 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 
 		public void onGestureStarted(GestureOverlayView overlay, MotionEvent event) {
 			Log.d(TAG, "GESTURE STARTED " + System.currentTimeMillis());
-			// altKey.setEnabled(false);
-			// shiftKey.setEnabled(false);
+
 			keyboardSwitch.setEnabled(false);
 			typeSwitch.setEnabled(false);
 			symbolSwitch.setEnabled(false);
@@ -196,7 +181,7 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 			spaceKey.setEnabled(false);
 			enterKey.setEnabled(false);
 
-			synchronized (this) {
+			synchronized (recognition_lock) {
 				if (current_task != null) overlay.removeCallbacks(current_task);
 			}
 		}
@@ -204,8 +189,6 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 		public void onGestureEnded(GestureOverlayView overlay, MotionEvent event) {
 			Log.d(TAG, "GESTURE ENDED " + System.currentTimeMillis());
 
-			// altKey.setEnabled(true);
-			// shiftKey.setEnabled(true);
 			keyboardSwitch.setEnabled(true);
 			typeSwitch.setEnabled(true);
 			symbolSwitch.setEnabled(true);
@@ -215,7 +198,7 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 
 			new RecognitionTask().execute(overlay.getGesture());
 
-			synchronized (this) {
+			synchronized (recognition_lock) {
 				overlay.removeCallbacks(current_task);
 				current_task = new CommitTextTask();
 				overlay.postDelayed(current_task, gestureInterval);
@@ -233,16 +216,11 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 				return classHandler.classify(gestures[0], modes[current_mode]);
 			}
 
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
-			 */
 			@Override
 			protected void onPostExecute(ClassificationResult result) {
 				super.onPostExecute(result);
-				synchronized (this) {
-					if (result != null) current_result = result;
+				synchronized (recognition_lock) {
+					current_result = result;
 				}
 			}
 		}
@@ -251,7 +229,7 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 			@Override
 			public void run() {
 				Log.d(TAG, "Commit text");
-				synchronized (this) {
+				synchronized (recognition_lock) {
 					service.enterCharacters(current_result);
 					current_result = null;
 					current_task = null;
@@ -292,7 +270,6 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 		public void onKey(int primaryCode, int[] keyCodes) {
 			service.enterCharacter((char) primaryCode);
 			showSymbols(false);
-			recentLabel.setText(Character.toString((char) primaryCode));
 		}
 
 		public void onPress(int primaryCode) {}

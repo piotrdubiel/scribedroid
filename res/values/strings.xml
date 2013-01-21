@@ -52,8 +52,6 @@
     <string name="special">!@#</string>
     
     <string-array name="input_modes">
-        <item name="all_mode">Auto</item>
-        <item name="letters_mode">Abc</item>
         <item name="capital_mode">ABC</item>
         <item name="small_mode">abc</item>
         <item name="digit_mode">123</item>

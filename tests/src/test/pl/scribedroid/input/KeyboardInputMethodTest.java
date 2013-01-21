@@ -12,8 +12,8 @@ public class KeyboardInputMethodTest {
 	ScribeDroid service;
 	@Before
 	public void setUp() {
-		service = new ScribeDroid();
-		input = new KeyboardInputMethod(service);
+//		service = new ScribeDroid();
+//		input = new KeyboardInputMethod(service);
 	}
 	
 	@Test

@@ -7,8 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import android.gesture.Gesture;
-
 import com.xtremelabs.robolectric.RobolectricTestRunner;
 
 /**

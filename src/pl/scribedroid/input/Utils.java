@@ -230,7 +230,7 @@ public class Utils {
 	}
 
 	public static Character decode(int i, int type) {
-		if (type == Classificator.NUMBER) {
+		if (type == Classificator.DIGIT) {
 			switch (i) {
 			case 0:
 				return '0';
@@ -335,8 +335,8 @@ public class Utils {
 			if (i < 35) return decode(i, Classificator.CAPITAL_ALPHA);
 			else return decode(i - 35, Classificator.SMALL_ALPHA);
 		}
-		else if (type == (Classificator.CAPITAL_ALPHA | Classificator.SMALL_ALPHA | Classificator.NUMBER)) {
-			if (i < 10) return decode(i, Classificator.NUMBER);
+		else if (type == (Classificator.CAPITAL_ALPHA | Classificator.SMALL_ALPHA | Classificator.DIGIT)) {
+			if (i < 10) return decode(i, Classificator.DIGIT);
 			if (i >= 10 && i < 45) return decode(i - 10, Classificator.CAPITAL_ALPHA);
 			else return decode(i - 45, Classificator.SMALL_ALPHA);
 		}
@@ -412,7 +412,7 @@ public class Utils {
 		if (!dir.exists()) dir.mkdirs();
 		File file = new File(dir, filename);
 
-		FileOutputStream os = new FileOutputStream(file);
+		FileOutputStream os = new FileOutputStream(file+".png");
 		in.compress(Bitmap.CompressFormat.PNG, 100, os);
 		os.flush();
 		os.close();

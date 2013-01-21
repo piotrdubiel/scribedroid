@@ -12,6 +12,7 @@ public class NativeNetwork implements Network {
 		System.loadLibrary("ann");
 	}
 
+	@SuppressWarnings("unused")
 	private int network;
 
 	@Override
@@ -45,6 +46,12 @@ public class NativeNetwork implements Network {
 
 	@Override
 	public ClassificationResult classify(float[] sample) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public float[] classifyRaw(float[] sample) {
 		// TODO Auto-generated method stub
 		return null;
 	}
