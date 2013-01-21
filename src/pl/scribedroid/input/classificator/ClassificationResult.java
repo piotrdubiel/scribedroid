@@ -72,8 +72,8 @@ public class ClassificationResult {
 		Collections.sort(result, new LabelComparator());
 		Collections.sort(b.result, new LabelComparator());
 
-		List<Label> candidatesA = result.subList(0, 5);
-		List<Label> candidatesB = b.result.subList(0, 5);
+		List<Label> candidatesA = result.subList(0, Math.min(5, result.size()));
+		List<Label> candidatesB = b.result.subList(0, Math.min(5, b.result.size()));
 
 		Log.d("Best A: ", Arrays.toString(getLabels(5)));
 		Log.d("Best B: ", Arrays.toString(b.getLabels(5)));
@@ -99,9 +99,9 @@ public class ClassificationResult {
 
 	public Character[] getLabels(int limit) {
 		Collections.sort(result, new LabelComparator());
-		Character[] chars = new Character[limit];
+		Character[] chars = new Character[Math.min(limit, result.size())];
 
-		for (int i = 0; i < limit; ++i)
+		for (int i = 0; i < Math.min(limit, result.size()); ++i)
 			chars[i] = result.get(i).label;
 
 		return chars;
@@ -113,7 +113,7 @@ public class ClassificationResult {
 
 	public Label[] getLabelsWithBelief(int limit) {
 		Collections.sort(result, new LabelComparator());
-		return (Label[]) result.subList(0, limit).toArray(new Label[result.size()]);
+		return (Label[]) result.subList(0, Math.min(limit, result.size())).toArray(new Label[Math.min(limit, result.size())]);
 	}
 
 	public Map<Character, Float> getLabelsAsMap() {
