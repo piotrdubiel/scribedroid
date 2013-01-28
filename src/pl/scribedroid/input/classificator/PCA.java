@@ -50,6 +50,12 @@ public class PCA {
 		}
 	}
 
+	/**
+	 * Przeprowadza operację PCA na podanym wektorze. 
+	 * Wektor wejściowy zapisany jako tablica wartości float jest przetwarzany na nową tablicę o długości mniejszej niż tablica wejściowa zawierającą wynik analizy.
+	 * @param in
+	 * @return
+	 */
 	public float[] applyPCA(float[] in) {
 		for (int i = 0; i < in.length; ++i) {
 			in[i] -= mu[i];

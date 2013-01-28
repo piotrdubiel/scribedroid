@@ -63,6 +63,10 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 
 	private ClassificationResult current_result;
 
+	/**
+	 * Konstruktor inicjuje elementy widoku i ładuje klasyfikatory. 
+	 * Wymaga podania klasy ScribeDroid, z którą będzie powiązany.
+	 */
 	public GestureInputMethod(ScribeDroid s) {
 		super(s, R.layout.gesture_input_view);
 
@@ -109,6 +113,13 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 		Log.d(TAG, "Interval preference: " + String.valueOf(gestureInterval));
 	}
 
+	
+	/**
+	 * Obsługuje długie wciśnięcie przycisków:
+	 * - Delete – usunięcie ostatniego wyrazu
+	 * - Return – przejście do ustawień
+	 * @see android.view.View.OnLongClickListener#onLongClick(android.view.View)
+	 */
 	public boolean onLongClick(View v) {
 		if (v.getId() == R.id.enterKey) {
 			Intent intent = new Intent(service.getBaseContext(), SettingsActivity.class);
@@ -123,6 +134,17 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 		return true;
 	}
 
+	
+	/**
+	 * Obsługuje wciśnięcie przycisków:
+	 * - zmiany widoku
+	 * - przycisku Delete
+	 * - zmiany typu rozpoznawanych gestów
+	 * - pokazania/schowania klawiatury z symbolami
+	 * - przycisku Spacja
+	 * - przycisku Return 
+	 * @see android.view.View.OnClickListener#onClick(android.view.View)
+	 */
 	public void onClick(View v) {
 		if (v.getId() == R.id.typeSwitch) {
 			current_mode++;
@@ -152,10 +174,10 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 		}
 	}
 
-	public void resetModifiers() {
-
-	}
-
+	/**
+	 * Pokazuje lub chowa klawiaturę z symbolami
+	 * @param visible true, jeśli klawiatura ma być widoczna, false w przeciwnym przypadku
+	 */
 	private void showSymbols(boolean visible) {
 		if (visible) {
 			supportSymbolKeyboardView.setVisibility(View.VISIBLE);
@@ -237,33 +259,6 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 				}
 			}
 		}
-
-		// private class ClassificationTask extends
-		// AsyncTask<Pair<Gesture, Long>, Void, Pair<Character, Gesture>> {
-		// Intent intent = new Intent(service, TrainingService.class);
-		// long timestamp;
-		//
-		// @Override
-		// protected Pair<Character, Gesture> doInBackground(
-		// Pair<Gesture, Long>... gestures) {
-		// intent.putExtra("gesture", gestures[0].first);
-		// timestamp = gestures[0].second;
-		// return classHandler.classify(gestures[0].first, currentType);
-		// }
-		//
-		// @Override
-		// protected void onPostExecute(Pair<Character, Gesture> result) {
-		// if (result != null) {
-		// service.enterCharacter(result.first);
-		// if (System.currentTimeMillis() - timestamp > gestureInterval) {
-		// gestureView.clear(true);
-		//
-		// }
-		// intent.putExtra("label", result.first);
-		// // service.startService(intent);
-		// }
-		// }
-		// }
 	}
 
 	private class SymbolProcessor implements OnKeyboardActionListener {

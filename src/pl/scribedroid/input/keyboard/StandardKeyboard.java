@@ -11,6 +11,11 @@ import pl.scribedroid.R;
 public class StandardKeyboard extends Keyboard {
 	private Key mEnterKey;
 	
+	/**
+	 * Tworzy klawiaturę z zasobu XML podanego w argumencie  xmlLayoutResId w podanym kontekście
+	 * @param context
+	 * @param xmlLayoutResId
+	 */
 	public StandardKeyboard(Context context, int xmlLayoutResId) {
 		super(context, xmlLayoutResId);
 	}
@@ -30,6 +35,11 @@ public class StandardKeyboard extends Keyboard {
         return key;
     }
     
+    /**
+     * Wczytuje podane w argumencie res zasoby i ustawia odpowiednie etykiety do podanych opcji z argumentu options
+     * @param res
+     * @param options
+     */
     void setImeOptions(Resources res, int options) {
         if (mEnterKey == null) {
             return;

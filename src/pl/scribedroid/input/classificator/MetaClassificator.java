@@ -39,17 +39,20 @@ public class MetaClassificator implements Classificator {
 			
 			small_library = new GestureLibraryClassificator(c, GestureLibraryClassificator.USER_SMALL_FILENAME);
 			if (!small_library.isValid()) {
+				Log.d(TAG, "Default small lib");
 				small_library = new GestureLibraryClassificator(c, R.raw.default_small_lib);
 			}
 
 			capital_library = new GestureLibraryClassificator(c, GestureLibraryClassificator.USER_CAPITAL_FILENAME);
 			if (!capital_library.isValid()) {
 				capital_library = new GestureLibraryClassificator(c, R.raw.default_capital_lib);
+				Log.d(TAG, "Default capital lib");
 			}
 
 			number_library = new GestureLibraryClassificator(c, GestureLibraryClassificator.USER_DIGIT_FILENAME);
 			if (!number_library.isValid()) {
 				number_library = new GestureLibraryClassificator(c, R.raw.default_digit_lib);
+				Log.d(TAG, "Default number lib");
 			}
 
 		}
@@ -60,25 +63,29 @@ public class MetaClassificator implements Classificator {
 		Log.i(TAG, "Classificator loaded");
 	}
 
+	/** (non-Javadoc)
+	 * Zwraca dla gestu o danym typie listę znaków, które ten gest może przedstawiać, zawartą w obiekcie ClassificationResult.
+	 * @see pl.scribedroid.input.classificator.Classificator#classify(android.gesture.Gesture, int)
+	 */
 	@Override
 	public ClassificationResult classify(Gesture gesture, int type) {
 		float[] sample = prepare(gesture);
-		Bitmap bitmap = Utils.getBitmapFromGesture(gesture);
 		if (sample == null) return null;
 		ClassificationResult result = null;
 		
-		float threshold = 0.001f;
+		float threshold = 0.0000001f;
 
 		if (type == Classificator.SMALL_ALPHA) {
 			ClassificationResult small_net_result = small_net.classify(sample);
 			ClassificationResult small_lib_result = small_library.classify(gesture, Classificator.SMALL_ALPHA);
 			
 			ClassificationResult pairs = small_net_result.pairsWith(small_lib_result);
-			if (pairs.result.size() > 0) {
+
+			if (pairs.result.size() > 0)  {
 				result = pairs;
 			}
 			else {
-				result = small_net_result.combine(small_lib_result).filter(threshold);
+				result = small_net_result.filter(threshold);
 			}
 		}
 		else if (type == Classificator.CAPITAL_ALPHA) {
@@ -105,23 +112,29 @@ public class MetaClassificator implements Classificator {
 
 		if (result.isEmpty()) result = null;
 
-		if (result != null) {
-			for (Label l : result.result)
-				Log.i(TAG, "RESULT: " + l.label + " " + l.belief);
-
-			Character c = result.getLabels()[0];
-			try {
-				Utils.saveBitmap(bitmap, "P-" + System.currentTimeMillis() + "-" + c);
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+//		if (result != null) {
+//			for (Label l : result.result)
+//				Log.i(TAG, "RESULT: " + l.label + " " + l.belief);
+//
+//			Character c = result.getLabels()[0];
+//			try {
+//				Utils.saveBitmap(bitmap, "P-" + System.currentTimeMillis() + "-" + c);
+//			}
+//			catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//		}
 		
 
 		return result;
 	}
 
+	/**
+	 * Konwertuje podany gest na wektor zapisany w tablicy wartości float.
+	 * Wektor ten jest tworzony zgodnie z formatem MNIST, a podlega analizie głównych składowych (PCA).
+	 * @param gesture
+	 * @return
+	 */
 	private float[] prepare(Gesture gesture) {
 		Bitmap in = Utils.getBitmapFromGesture(gesture);
 		if (in == null) return null;
@@ -137,11 +150,19 @@ public class MetaClassificator implements Classificator {
 		return pca.applyPCA(sample);
 	}
 
+	/**
+	 * Nieużywane, zawsze zwraca null
+	 * @see pl.scribedroid.input.classificator.Classificator#classify(float[])
+	 */
 	@Override
 	public ClassificationResult classify(float[] sample) {
 		return null;
 	}
 
+	/**
+	 * Nieużywane, zawsze zwraca null
+	 * @see pl.scribedroid.input.classificator.Classificator#classifyRaw(float[])
+	 */
 	@Override
 	public float[] classifyRaw(float[] sample) {
 		return null;

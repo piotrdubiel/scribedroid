@@ -15,7 +15,15 @@ import pl.scribedroid.input.Utils;
 import android.util.Log;
 
 public class ClassificationResult {
+	/**
+	 * Lista rezultatów rozpoznawania
+	 */
 	ArrayList<Label> result;
+	
+	/**
+	 * Typ klasyfikatora, który utworzył ten rezultat.
+	 * @see pl.scribedroid.input.classificator.Classificator 
+	 */
 	int type;
 
 	public ClassificationResult(float[] in, int type) {
@@ -43,6 +51,13 @@ public class ClassificationResult {
 		Collections.sort(this.result, new CharacterComparator());
 	}
 
+	/**
+	 * Tworzy nowy obiekt ClassificationResult przez połączenie wyników z podanym obiektem ClassificationResult. 
+	 * Połączenie to polega na wymnożeniu wartości funkcji ufności każdej etykiety z wartościami funkcji dla etykiet 
+	 * z podanego w argumencie obiektu, jeśli etykiety są równe.
+	 * @param b
+	 * @return
+	 */
 	public ClassificationResult combine(ClassificationResult b) {
 		ArrayList<Label> new_result = new ArrayList<Label>(result.size());
 		for (Label l : result)
@@ -57,6 +72,11 @@ public class ClassificationResult {
 		return new ClassificationResult(new_result, type | b.type);
 	}
 	
+	/**
+	 * Usuwa z listy obiekty, których funkcja ufności jest poniżej podanego progu.
+	 * @param threshold minimalna wartość funkcji ufności
+	 * @return
+	 */
 	public ClassificationResult filter(float threshold) {
 		for (Iterator<Label> it = result.iterator(); it.hasNext(); ) {
 		    Label l = it.next();
@@ -67,6 +87,11 @@ public class ClassificationResult {
 		return this;
 	}
 
+	/**
+	 * Tworzy nowy obiekt ClassificationResult z listą obiektów Label, których etykiety się powtórzyły w obu listach.
+	 * @param b
+	 * @return
+	 */
 	public ClassificationResult pairsWith(ClassificationResult b) {
 		ArrayList<Label> pairs = new ArrayList<ClassificationResult.Label>();
 		Collections.sort(result, new LabelComparator());
@@ -95,6 +120,12 @@ public class ClassificationResult {
 
 	public Character[] getLabels() {
 		return getLabels(result.size());
+	}
+	
+	public Label best() {
+		if (result == null || result.isEmpty()) return null;
+		Collections.sort(result, new LabelComparator());
+		return result.get(0);
 	}
 
 	public Character[] getLabels(int limit) {

@@ -11,8 +11,8 @@ import android.util.Log;
 
 public class SuggestionManager {
 	private static final String TAG = "SuggestionManager";
-	private NativeDictionary native_dictionary;
-	private UserDictionary user_dictionary;
+	private Dictionary native_dictionary;
+	private Dictionary user_dictionary;
 	// private DatabaseDictionary db_dictionary;
 	private Context context;
 	private int maxSuggestions = 10;
@@ -26,8 +26,6 @@ public class SuggestionManager {
 			protected Void doInBackground(Void... params) {
 				native_dictionary = new NativeDictionary(context, maxSuggestions);
 				user_dictionary = new UserDictionary(context);
-				// db_dictionary = new DatabaseDictionary(context,
-				// maxSuggestions);
 				return null;
 			}
 
@@ -39,33 +37,18 @@ public class SuggestionManager {
 		}.execute();
 	}
 
+	/**
+	 * Przeszukuje UserDictionary i NativeDictionary pod kątem sugestii dla podanego w argumencie słowa, 
+	 * a następnie zwraca listę sugestii
+	 * @param word
+	 * @return
+	 */
 	public List<String> getSuggestions(String word) {
 		Set<String> result = new LinkedHashSet<String>();
 		result.add(word);
 
 		List<String> nativeList = native_dictionary.getSuggestions(word);
 		List<String> userList = user_dictionary.getSuggestions(word);
-		// List<String> dbList = db_dictionary.getSuggestions(word);
-
-		// while (!userList.isEmpty() && !dbList.isEmpty()) {
-		// if (result.size() >= maxSuggestions)
-		// break;
-		// result.add(userList.get(0));
-		// userList.remove(0);
-		// if (result.size() >= maxSuggestions)
-		// break;
-		// result.add(dbList.get(0));
-		// dbList.remove(0);
-		// }
-		//
-		// if (result.size() < maxSuggestions) {
-		// if (!userList.isEmpty()) {
-		// result.addAll(userList);
-		// }
-		// if (!dbList.isEmpty()) {
-		// result.addAll(dbList);
-		// }
-		// }
 
 		while (!userList.isEmpty() && !nativeList.isEmpty()) {
 			if (result.size() >= maxSuggestions) break;
@@ -88,26 +71,44 @@ public class SuggestionManager {
 		return new ArrayList<String>(result);
 	}
 
+	/**
+	 * Zwraca true, jeśli podane słowo istnieje w słownik użytkownika lub w wbudowanym słowniku
+	 * @param word
+	 * @return
+	 */
 	public boolean isValid(String word) {
-		// Log.v(TAG, "Database valid: " +
-		// String.valueOf(db_dictionary.isValid(word)));
 		Log.v(TAG, "Native valid: " + String.valueOf(native_dictionary.isValid(word)));
 		Log.v(TAG, "User valid: " + String.valueOf(user_dictionary.isValid(word)));
 		return native_dictionary.isValid(word) || user_dictionary.isValid(word);
 	}
 
+	/**
+	 * Zwraca true, jeśli podane słowo istnieje w słownik użytkownika lub w wbudowanym słowniku
+	 * @return
+	 */
 	public boolean isReady() {
 		return ready;
 	}
 
+	/**
+	 * Dodaje podane słowo do słownika  UserDictionary
+	 * @param word
+	 */
 	public void addToUserDictionary(String word) {
 		user_dictionary.addWord(word);
 	}
 
+	/**
+	 * Dodaje podane słowo do słownika   NativeDictionary
+	 * @param word
+	 */
 	public void addToDictionary(String word) {
 		native_dictionary.addWord(word);
 	}
 
+	/**
+	 * Zamyka słownik NativeDictionary (słownik UserDictionary nie wymaga zamknięcia)
+	 */
 	public void close() {
 		if (native_dictionary != null) native_dictionary.close();
 	}

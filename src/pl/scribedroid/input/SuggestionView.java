@@ -114,22 +114,15 @@ public class SuggestionView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int measuredWidth = resolveSize(50, widthMeasureSpec);
         
-        // Get the desired height of the icon menu view (last row of items does
-        // not have a divider below)
         Rect padding = new Rect();
         mSelectionHighlight.getPadding(padding);
         final int desiredHeight = ((int)mPaint.getTextSize()) + mVerticalPadding
                 + padding.top + padding.bottom;
         
-        // Maximum possible width and desired height
         setMeasuredDimension(measuredWidth,
                 resolveSize(desiredHeight, heightMeasureSpec));
     }
 
-    /**
-     * If the canvas is null, then only touch calculations are performed to pick the target
-     * candidate.
-     */
     @Override
     protected void onDraw(Canvas canvas) {
         if (canvas != null) {
@@ -221,7 +214,7 @@ public class SuggestionView extends View {
         mTypedWordValid = typedWordValid;
         scrollTo(0, 0);
         mTargetScrollX = 0;
-        // Compute the total width
+        
         onDraw(null);
         invalidate();
         requestLayout();
@@ -253,7 +246,6 @@ public class SuggestionView extends View {
             break;
         case MotionEvent.ACTION_MOVE:
             if (y <= 0) {
-                // Fling up!?
                 if (selectedIndex >= 0) {
                     service.pickSuggestion(mSuggestions.get(selectedIndex));
                     selectedIndex = -1;
@@ -274,15 +266,9 @@ public class SuggestionView extends View {
         }
         return true;
     }
-    
-    /**
-     * For flick through from keyboard, call this method with the x coordinate of the flick 
-     * gesture.
-     * @param x
-     */
+
     public void takeSuggestionAt(float x) {
         mTouchX = (int) x;
-        // To detect candidate
         onDraw(null);
         if (selectedIndex >= 0) {
         	service.pickSuggestion(mSuggestions.get(selectedIndex));

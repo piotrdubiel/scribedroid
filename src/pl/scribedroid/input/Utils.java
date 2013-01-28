@@ -74,22 +74,6 @@ public class Utils {
 		return gestures;
 	}
 
-	public static float[] applyPCA(float[] in, float[] mu, float[][] trmx) {
-		for (int i = 0; i < in.length; ++i) {
-			in[i] -= mu[i];
-
-		}
-
-		float[] out = new float[trmx.length];
-		for (int i = 0; i < trmx.length; ++i) {
-			out[i] = 0.0f;
-			for (int j = 0; j < trmx[i].length; ++j) {
-				out[i] += in[j] * trmx[i][j];
-			}
-		}
-		return out;
-	}
-
 	public static Bitmap dilation(Bitmap in, int n, float threshold) {
 		Bitmap out = null;
 		for (int k = 0; k < n; ++k) {
@@ -343,6 +327,12 @@ public class Utils {
 		return null;
 	}
 
+	/**
+	 * Konwertuje podany obiekt Gesture na obiekt Bitmap o wymiarach zgodnych z
+	 * formatem MNIST tzn. skaluje bitmapę proporcjonalnie tak, aby dłuższy z wymiarów wynosił 20.
+	 * @param in
+	 * @return
+	 */
 	public static Bitmap getBitmapFromGesture(Gesture in) {
 		int width = (int) Math.abs(in.getBoundingBox().right - in.getBoundingBox().left);
 		int height = (int) Math.abs(in.getBoundingBox().top - in.getBoundingBox().bottom);
@@ -361,6 +351,12 @@ public class Utils {
 		return in.toBitmap(width + 10, height + 10, 2, Color.WHITE);
 	}
 
+	/**
+	 * Liczy środek ciężkości bitmapy i wstawia do nowej bitmapy o rozmiarze 28x28. 
+	 * Następnie tworzy z niej wektor.
+	 * @param in
+	 * @return tablica wartości pikselów w skali szarości
+	 */
 	public static float[] getVectorFromBitmap(Bitmap in) {
 		float[] out = new float[VECTOR_LENGTH];
 
@@ -387,6 +383,12 @@ public class Utils {
 		return out;
 	}
 
+	
+	/**
+	 * Oblicza środek ciężkości podanej bitmapy.
+	 * @param in
+	 * @return Punkt będą cy środkiem ciężkości
+	 */
 	public static Point getCenter(Bitmap in) {
 		float centerx = 0;
 		float centery = 0;

@@ -1,10 +1,5 @@
 package pl.scribedroid.input.dictionary;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,41 +18,36 @@ public class NativeDictionary extends Dictionary {
 
 	public int freq_limit = 3;
 
+	/**
+	 * Tworzy drzewo Trie z wyrazów w bazie danych zapisanych w pliku o nazwie filename i ustala dolnym limit częstotliwości powtórzenia się słowa, aby odfiltrować słowa spotykane bardzo rzadko.
+	 * Zwraca wskaźnik na obiekt jako wartość int.
+	 * @param filename
+	 * @param freq_limit
+	 * @return
+	 */
 	private native int createDictionary(String filename, int freq_limit);
 
+	/**
+	 * Zwraca listę słów mogących być zakończeniem podanego prefiksu.
+	 * @param dict
+	 * @param prefix
+	 * @param limit
+	 * @return
+	 */
 	private native String[] suggest(int dict, String prefix, int limit);
 
+	/**
+	 * Zwraca prawdę jeśli słowo występuje w słowniku.
+	 * @param dict
+	 * @param word
+	 * @return
+	 */
 	private native boolean isValid(int dict, String word);
 
 	private int dictionary;
 	private int maxSuggestions;
 	private DictionaryDbHelper dbHelper;
 	private SQLiteDatabase database;
-
-	public NativeDictionary(Context c, int limit, String filename) {
-		super(c);
-		maxSuggestions = limit;
-		dbHelper = new DictionaryDbHelper(c);
-		database = dbHelper.getWritableDatabase();
-		String db_filename = database.getPath();
-		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
-			String word = null;
-			while ((word = reader.readLine()) != null) {
-				addWord(word);
-			}
-		}
-		catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		dictionary = createDictionary(db_filename, freq_limit);
-	}
 
 	public NativeDictionary(Context c, int limit) {
 		super(c);

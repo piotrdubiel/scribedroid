@@ -31,9 +31,13 @@ public class TrigramDatabase {
 		database = dbHelper.getWritableDatabase();
 	}
 
+	/**
+	 * Dodaje trigram do bazy lub aktualizuje częstotliwość występowania, jeśli już istnieje
+	 * @param trigram
+	 */
 	public void addTrigram(String trigram) {
 		Cursor cursor = database.query(TrigramDbHelper.TABLE_GRAMS, TrigramDbHelper.ALL_COLUMNS, TrigramDbHelper.COLUMN_GRAM + "=?", new String[] { trigram }, null, null, null);
-		Log.v("Add Word", "WORD: " + trigram);
+		Log.v("Add Word", "TRIGRAM: " + trigram);
 		if (cursor.getCount() == 0) {
 			Log.v("Add trigram", "No trigram found");
 			ContentValues values = new ContentValues();
@@ -54,6 +58,11 @@ public class TrigramDatabase {
 		cursor.close();
 	}
 
+	/**
+	 * Zwraca listę obiektów Label. Reprezentują one możliwe zakończenia podanego prefiksu wraz z prawdopodobieństwem wystąpienia takiej sekwencji
+	 * @param prefix
+	 * @return
+	 */
 	public ArrayList<Label> getSuggestions(String prefix) {
 		Log.d(TAG, "Suggest");
 		int denom = computeNormalizer();
@@ -70,10 +79,17 @@ public class TrigramDatabase {
 		return result;
 	}
 
+	/**
+	 * Zamyka powiązaną bazę danych
+	 */
 	public void close() {
 		database.close();
 	}
 
+	/**
+	 * Oblicza sumę częstotliwości wszystkich trigramów, aby później znormalizować prawdopodobieństwo
+	 * @return
+	 */
 	private int computeNormalizer() {
 		Cursor cursor = database.rawQuery("SELECT SUM(" + TrigramDbHelper.COLUMN_FREQUENCY + ") FROM " + TrigramDbHelper.TABLE_GRAMS, null);
 		cursor.moveToFirst();

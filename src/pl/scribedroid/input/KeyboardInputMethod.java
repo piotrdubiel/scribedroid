@@ -37,6 +37,11 @@ public class KeyboardInputMethod extends InputMethodController implements
 	@InjectResource(R.string.word_separators)
 	String word_separators;
 
+	/**
+	 * Konstruktor inicjuje elementy widoku i ładuje klawiatury (znakową, symboli i symboli z wciśniętym klawiszem Shift).
+	 * Wymaga podania klasy ScribeDroid, z którą będzie powiązany.
+	 * @param s
+	 */
 	public KeyboardInputMethod(ScribeDroid s) {
 		super(s, R.layout.standard_keyboard);
 		keyboard_view = (KeyboardView) inputView.findViewById(R.id.keyboard);
@@ -49,6 +54,10 @@ public class KeyboardInputMethod extends InputMethodController implements
 		keyboard_view.setOnKeyboardActionListener(this);
 	}
 
+	/**
+	 * Resetuje stan klawisza Shift.
+	 * @see pl.scribedroid.input.InputMethodController#resetModifiers()
+	 */
 	@Override
 	public void resetModifiers() {
 		Log.d(TAG, "Last keycode: " + last_keycode + " Current keycode: " + current_keycode+ " " +isCodeComplex(current_keycode));
@@ -67,6 +76,11 @@ public class KeyboardInputMethod extends InputMethodController implements
 		}
 	}
 
+	/**
+	 * Obsługuje zdarzenie naciśnięcia na przycisk. 
+	 * Inne, możliwe klawisze w zmiennej keyCodes nie są brane pod uwagę
+	 * @see android.inputmethodservice.KeyboardView.OnKeyboardActionListener#onKey(int, int[])
+	 */
 	@Override
 	public void onKey(int primaryCode, int[] keyCodes) {
 		Log.v(TAG, "OnKey: " + primaryCode + " " + (char) primaryCode);

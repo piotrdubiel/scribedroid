@@ -25,7 +25,7 @@ import android.widget.Toast;
 public class ScribeDroid extends InputMethodService implements OnSharedPreferenceChangeListener {
 	private static final String TAG = "ScribeDroid";
 
-	SuggestionView candidateView;
+	SuggestionView suggestionView;
 
 	private InputMethodController currentInputMethod;
 	private GestureInputMethod gestureInputMethod;
@@ -42,12 +42,15 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 	private TrigramDatabase trigram_database;
 
 	StringBuilder composing_text = new StringBuilder();
-	// LinkedList<ClassificationResult> composing_results = new
-	// LinkedList<ClassificationResult>();
 
 	@InjectResource(R.string.word_separators)
 	String word_separators;
 
+	/** 
+	 * Ładuje ustawienia i inicjuje pomocnicze narzędzia: słownik, bazę trigramów.
+	 * Wstrzykuje zależności. 
+	 * @see android.inputmethodservice.InputMethodService#onCreate()
+	 */
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -57,16 +60,25 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 		trigram_database = new TrigramDatabase(this);
 	}
 	
+	/** 
+	 * Tworzy widoki trybów wpisywania tekstu. 
+	 * @see android.inputmethodservice.InputMethodService#onCreateInputView()
+	 */
 	@Override
 	public View onCreateInputView() {
 		
 		gestureInputMethod = new GestureInputMethod(this);
 		keyboardInputMethod = new KeyboardInputMethod(this);
 		currentInputMethod = gestureInputMethod;
-		
+
 		return currentInputMethod.inputView;
 	}
 
+	/** 
+	 * Metoda jest wywoływana przy rozpoczęciu wprowadzania  tekstu do innego pola. 
+	 * Wykrywa typ pola i wyłącza sugestie dla pól, które oczekują na wpisanie hasła,  adresu e-mail czy adresu URL lub zażądały wyłączenia sugestii.
+	 * @see android.inputmethodservice.InputMethodService#onStartInput(android.view.inputmethod.EditorInfo, boolean)
+	 */
 	@Override
 	public void onStartInput(EditorInfo info, boolean restarting) {
 		super.onStartInput(info, restarting);
@@ -94,12 +106,6 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 		Log.d(TAG, "Completion: " + String.valueOf(completion_settings && completion_on));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.inputmethodservice.InputMethodService#onUpdateSelection(int,
-	 * int, int, int, int, int)
-	 */
 	@Override
 	public void onUpdateSelection(int oldSelStart, int oldSelEnd, int newSelStart, int newSelEnd,
 			int candidatesStart, int candidatesEnd) {
@@ -114,17 +120,22 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 		}
 	}
 
-	public void onStartInputView(EditorInfo info, boolean restarting) {
-		super.onStartInputView(info, restarting);
-	}
-
+	/**
+	 * Tworzy widok z listą sugestii
+	 * @see android.inputmethodservice.InputMethodService#onCreateCandidatesView()
+	 */
 	@Override
 	public View onCreateCandidatesView() {
-		candidateView = new SuggestionView(this);
-		candidateView.setService(this);
-		return candidateView;
+		suggestionView = new SuggestionView(this);
+		suggestionView.setService(this);
+		return suggestionView;
 	}
 
+	/**
+	 * Metoda jest wywoływana przy zakończeniu wprowadzania tekstu do pola. 
+	 * Resetuje ona stan aplikacji, aby przygotować ją na przejście do następnego pola.
+	 * @see android.inputmethodservice.InputMethodService#onFinishInput()
+	 */
 	@Override
 	public void onFinishInput() {
 		super.onFinishInput();
@@ -133,25 +144,9 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 		setCandidatesViewShown(false);
 	}
 
-	// @Override
-	// public void onDisplayCompletions(CompletionInfo[] c) {
-	// Log.d(TAG, "OnDisplayCompletions");
-	// if (completionOn) {
-	// completions = c;
-	// if (completions == null) {
-	// candidateView.setSuggestions(null, false);
-	// return;
-	// }
-	//
-	// List<String> stringList = new ArrayList<String>();
-	// for (int i=0; i<(completions != null ? completions.length : 0); i++) {
-	// CompletionInfo ci = completions[i];
-	// if (ci != null) stringList.add(ci.getText().toString());
-	// }
-	// candidateView.setSuggestions(stringList, true);
-	// }
-	// }
-
+	/**
+	 * Wprowadza aktualnie komponowany tekst do pola i odświeża listę sugestii.
+	 */
 	void commitText() {
 		InputConnection ic = getCurrentInputConnection();
 		if (composing_text.length() > 0) {
@@ -165,6 +160,12 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 		}
 	}
 
+	
+	/**
+	 * Wprowadza podaną literę do aktualnie komponowanego tekstu.
+	 * Jeśli znak jest separatorem słowa, to wywołuje metodę commitText.
+	 * @param c znak, który ma zostać wpisany
+	 */
 	void enterCharacter(Character c) {
 		if (c == null) return;
 
@@ -184,6 +185,14 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 		refreshSuggestions();
 	}
 	
+	
+	/**
+	 * Przy włączonej analizie trigramów porównuje podany w argumencie rezultat (listę znaków zawartą w obiekcie ClassificationResult) z bazą trigramów 
+	 * i wybiera najbardziej prawdopodobny wariant. 
+	 * Jeśli ta opcja jest wyłączona, to wybiera najlepszy w klasyfikatora znak i wprowadza go do aktualnie komponowanego tekstu.
+	 * Aktualizuje w obu przypadkach listę sugestii.
+	 * @param result wynik rozpoznawania
+	 */
 	void enterCharacters(ClassificationResult result) {
 		if (result == null) return;
 
@@ -201,9 +210,9 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
+	 * Zakończenie działania aplikacji skutkuje wywołaniem tej metody.
+	 * Zamyka ona bazę danych trigramów oraz słownik.
 	 * @see android.inputmethodservice.InputMethodService#onDestroy()
 	 */
 	@Override
@@ -214,6 +223,9 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 		super.onDestroy();
 	}
 
+	/**
+	 * Usuwa ostatni znak i odświeża listę sugestii.
+	 */
 	void delete() {
 		Log.d(TAG, "delete");
 		InputConnection ic = getCurrentInputConnection();
@@ -227,6 +239,9 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 		refreshSuggestions();
 	}
 
+	/**
+	 * Usuwa ostatni wyraz za kursorem. Odświeża listę sugestii.
+	 */
 	void deleteAfterLongClick() {
 		InputConnection ic = getCurrentInputConnection();
 		if (composing_text.length() > 0) {
@@ -263,6 +278,11 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 		}
 	}
 
+	
+	/**
+	 * Powoduje pobranie listy sugestii dla aktualnie wpisanego prefiksu 
+	 * i wyświetlenie ich w widoku SuggestionView.
+	 */
 	void refreshSuggestions() {
 		Log.i(TAG, "REFRESH Suggestions " + String.valueOf(suggest != null ? suggest.isReady() : false));
 		if (completion_settings && completion_on && suggest != null && suggest.isReady()) {
@@ -296,7 +316,7 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 			if (composing_text.length() > 0) {
 				String word = composing_text.toString();
 				List<String> suggestions = suggest.getSuggestions(word);
-				candidateView.setSuggestions(suggestions, suggest.isValid(word));
+				suggestionView.setSuggestions(suggestions, suggest.isValid(word));
 				setCandidatesViewShown(true);
 
 			}
@@ -305,6 +325,10 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 		else setCandidatesViewShown(false);
 	}
 
+	/**
+	 * Powoduje przełączenie trybu wpisywania tekstu na następny.
+	 * Jest wywoływany przez podklasy InputMethodController do zasygnalizowania zmiany trybu.
+	 */
 	public void switchInputMethod() {
 		if (currentInputMethod == gestureInputMethod) currentInputMethod = keyboardInputMethod;
 		else if (currentInputMethod == keyboardInputMethod) currentInputMethod = gestureInputMethod;
@@ -337,6 +361,12 @@ public class ScribeDroid extends InputMethodService implements OnSharedPreferenc
 		}
 	}
 
+	
+	/**
+	 * Jeśli nastąpi zmiana w ustawieniach aplikacji, metoda ta zostanie wywołana, aby zasygnalizować potrzebę uaktualnienia. 
+	 * Wszystkie ustawienia zostaną jeszcze raz załadowane.
+	 * @see android.content.SharedPreferences.OnSharedPreferenceChangeListener#onSharedPreferenceChanged(android.content.SharedPreferences, java.lang.String)
+	 */
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 		loadPreferences();
 	}

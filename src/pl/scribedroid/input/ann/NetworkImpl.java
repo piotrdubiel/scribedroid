@@ -18,25 +18,41 @@ import android.gesture.Gesture;
 import android.util.Log;
 
 public class NetworkImpl implements Network {
-	private ArrayList<LayerImpl> layers;
+	private ArrayList<Layer> layers;
 	int type;
 
+	/**
+	 * Tworzy pustą sieć neuronową bez żadnych warstw
+	 */
 	public NetworkImpl() {
 	}
 
+	/**
+	 * Tworzy sieć neuronową o podanym typie i topologii z losowo wybranymi wagami
+	 * @param topology
+	 * @param type
+	 */
 	public NetworkImpl(int[] topology, int type) {
 		this.type = type;
-		layers = new ArrayList<LayerImpl>();
+		layers = new ArrayList<Layer>();
 		for (int i = 1; i < topology.length; ++i) {
-			layers.add(new LayerImpl(topology[i], topology[i - 1]));
+			layers.add(new Layer(topology[i], topology[i - 1]));
 		}
 	}
 
+	/**
+	 * Nieużywane, zawsze zwraca null
+	 * @see pl.scribedroid.input.classificator.Classificator#classify(android.gesture.Gesture, int)
+	 */
 	@Override
 	public ClassificationResult classify(Gesture gesture, int type) {
 		return null;
 	}
 
+	/**
+	 * Zwraca wynik klasyfikacji sieci neuronowej opakowany w obiekt ClassificationResult.
+	 * @see pl.scribedroid.input.classificator.Classificator#classify(float[])
+	 */
 	@Override
 	public ClassificationResult classify(float[] sample) {
 		float[] y = classifyRaw(sample);
@@ -73,10 +89,14 @@ public class NetworkImpl implements Network {
 	}
 
 	
+	/**
+	 * Klasyfikuje wektor bez opakowywania wyniku w obiekt ClassificationResult.
+	 * @see pl.scribedroid.input.classificator.Classificator#classifyRaw(float[])
+	 */
 	@Override
 	public float[] classifyRaw(float[] sample) {
 		float[] result = sample;
-		for (LayerImpl l : layers) {
+		for (Layer l : layers) {
 			result = l.answer(result);
 		}
 		return result;
@@ -91,7 +111,7 @@ public class NetworkImpl implements Network {
 				+ (layers.get(0).numberOfInputs() - 1) + " inputs instead of " + in.length);
 
 		y.add(new Vector(in));
-		for (LayerImpl l : layers) {
+		for (Layer l : layers) {
 			dy.add(new Vector(l.dy(y.get(y.size() - 1).toArray())));
 			y.add(new Vector(l.answer(y.get(y.size() - 1).toArray())));
 		}
@@ -135,6 +155,10 @@ public class NetworkImpl implements Network {
 		return result;
 	}
 
+	/**
+	 * Ładuje sieć z podanego obiektu InputStream.
+	 * @see pl.scribedroid.input.ann.Network#load(java.io.InputStream)
+	 */
 	@Override
 	public Network load(InputStream input) {
 		try {
@@ -147,10 +171,10 @@ public class NetworkImpl implements Network {
 				arch[i] = data_in.readInt();
 			}
 
-			layers = new ArrayList<LayerImpl>();
+			layers = new ArrayList<Layer>();
 
 			for (int l = 0; l < layer - 1; ++l) {
-				layers.add(new LayerImpl());
+				layers.add(new Layer());
 			}
 
 			for (int i = 0; i < arch.length - 2; ++i) {
@@ -180,6 +204,10 @@ public class NetworkImpl implements Network {
 		return this;
 	}
 
+	/**
+	 * Zapisuje sieć do podanego obiektu OutputStream.
+	 * @see pl.scribedroid.input.ann.Network#save(java.io.OutputStream)
+	 */
 	@Override
 	public void save(OutputStream output) {
 		try {
@@ -207,26 +235,61 @@ public class NetworkImpl implements Network {
 		}
 	}
 
+	/**
+	 * W podanym kontekście ładuje wagi sieci z pliku zasobów o identyfikatorze rid i tworzy sieć o typie równym type.
+	 * Równoważne:
+	 * NetworkImpl instance = 
+	 * (NetworkImpl) new NetworkImpl().load(context.getResources().openRawResource(rid));
+	 * instance.type = type;
+	 * return instance;
+	 * @param context
+	 * @param rid
+	 * @param type
+	 * @return
+	 */
 	public static NetworkImpl createFromRawResource(Context context, int rid, int type) {
 		NetworkImpl instance = (NetworkImpl) new NetworkImpl().load(context.getResources().openRawResource(rid));
 		instance.type = type;
 		return instance;
 	}
 
+	/**
+	 * Ładuje wagi sieci ze strumienia wejściowego in i tworzy sieć o typie równym type
+	 * Równoważne:
+	 * NetworkImpl instance = (NetworkImpl) new NetworkImpl().load(in);
+	 * instance.type = type;
+	 * return instance;
+	 * @param in
+	 * @param type
+	 * @return
+	 */
 	public static NetworkImpl createFromInputStream(InputStream in, int type) {
 		NetworkImpl instance = (NetworkImpl) new NetworkImpl().load(in);
 		instance.type = type;
 		return instance;
 	}
 
+	/**
+	 * Zwraca warstwę o podanym numerze ( 0 – warstwa wejściowa )
+	 * @param location
+	 * @return
+	 */
 	public Layer get(int location) {
 		return layers.get(location);
 	}
 
+	/**
+	 * Zwraca liczbę warstw
+	 * @return
+	 */
 	public int size() {
 		return layers.size();
 	}
 
+	/**
+	 * Zwraca tablicę z liczbą neuronów w kolejnych warstwach.
+	 * @see pl.scribedroid.input.ann.Network#getTopology()
+	 */
 	@Override
 	public int[] getTopology() {
 		if (layers.isEmpty()) return new int[0];
