@@ -64,8 +64,8 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 	private ClassificationResult current_result;
 
 	/**
-	 * Konstruktor inicjuje elementy widoku i ładuje klasyfikatory. 
-	 * Wymaga podania klasy ScribeDroid, z którą będzie powiązany.
+	 * Konstruktor inicjuje elementy widoku i ładuje klasyfikatory. Wymaga
+	 * podania klasy ScribeDroid, z którą będzie powiązany.
 	 */
 	public GestureInputMethod(ScribeDroid s) {
 		super(s, R.layout.gesture_input_view);
@@ -113,11 +113,10 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 		Log.d(TAG, "Interval preference: " + String.valueOf(gestureInterval));
 	}
 
-	
 	/**
-	 * Obsługuje długie wciśnięcie przycisków:
-	 * - Delete – usunięcie ostatniego wyrazu
-	 * - Return – przejście do ustawień
+	 * Obsługuje długie wciśnięcie przycisków: - Delete – usunięcie ostatniego
+	 * wyrazu - Return – przejście do ustawień
+	 * 
 	 * @see android.view.View.OnLongClickListener#onLongClick(android.view.View)
 	 */
 	public boolean onLongClick(View v) {
@@ -134,15 +133,11 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 		return true;
 	}
 
-	
 	/**
-	 * Obsługuje wciśnięcie przycisków:
-	 * - zmiany widoku
-	 * - przycisku Delete
-	 * - zmiany typu rozpoznawanych gestów
-	 * - pokazania/schowania klawiatury z symbolami
-	 * - przycisku Spacja
-	 * - przycisku Return 
+	 * Obsługuje wciśnięcie przycisków: - zmiany widoku - przycisku Delete -
+	 * zmiany typu rozpoznawanych gestów - pokazania/schowania klawiatury z
+	 * symbolami - przycisku Spacja - przycisku Return
+	 * 
 	 * @see android.view.View.OnClickListener#onClick(android.view.View)
 	 */
 	public void onClick(View v) {
@@ -176,7 +171,10 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 
 	/**
 	 * Pokazuje lub chowa klawiaturę z symbolami
-	 * @param visible true, jeśli klawiatura ma być widoczna, false w przeciwnym przypadku
+	 * 
+	 * @param visible
+	 *            true, jeśli klawiatura ma być widoczna, false w przeciwnym
+	 *            przypadku
 	 */
 	private void showSymbols(boolean visible) {
 		if (visible) {
@@ -281,4 +279,7 @@ public class GestureInputMethod extends InputMethodController implements OnClick
 
 		public void swipeUp() {}
 	}
+
+	@Override
+	public void resetModifiers() {}
 }
